@@ -37,7 +37,7 @@ const hashPin=(pin,sal)=>crypto.scryptSync(String(pin),sal,32).toString('hex');
 
 const app=express();
 app.use(express.json({limit:'100mb'}));
-app.use(express.static(path.join(__dirname,'public')));
+app.use(express.static(__dirname));
 
 /* ===== Autenticación ===== */
 function autenticar(req,res,next){
