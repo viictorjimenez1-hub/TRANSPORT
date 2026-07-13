@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Transport Luis &amp; Katherine · Finanzas</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+<link rel="stylesheet" id="cssFontAwesome" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+// Respaldo: si Font Awesome no carga desde cdnjs, se intenta desde jsDelivr
+window.addEventListener('load',function(){
+  setTimeout(function(){
+    var prueba=document.createElement('i');
+    prueba.className='fa-solid fa-check';
+    prueba.style.cssText='position:absolute;left:-9999px';
+    document.body.appendChild(prueba);
+    var fuente=getComputedStyle(prueba).fontFamily||'';
+    if(fuente.indexOf('Font Awesome')<0){
+      var l=document.createElement('link');
+      l.rel='stylesheet';
+      l.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css';
+      document.head.appendChild(l);
+    }
+    prueba.remove();
+  },1500);
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>if(typeof Chart==='undefined')document.write('<script src="https:\/\/cdn.jsdelivr.net\/npm\/chart.js@4.4.0\/dist\/chart.umd.min.js"><\/script>')</script>
+<style>
+:root{
+  --azul:#0B2545; --azul-2:#13315C; --azul-3:#1D4E89;
+  --naranja:#F77F00; --naranja-2:#FFA240;
+  --fondo:#F2F5FA; --tarjeta:#FFFFFF; --texto:#12233F; --texto-suave:#5B6B84;
+  --verde:#15803D; --rojo:#DC2626; --borde:#E3E9F2;
+  --sombra:0 6px 18px rgba(11,37,69,.08);
+}
+html[data-bs-theme="dark"]{
+  --fondo:#0A1526; --tarjeta:#122442; --texto:#EAF1FB; --texto-suave:#9FB0C9;
+  --verde:#4ADE80; --rojo:#F87171; --borde:#1E3A5F;
+  --sombra:0 6px 18px rgba(0,0,0,.35);
+}
+*{-webkit-tap-highlight-color:transparent}
+body{background:var(--fondo);color:var(--texto);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding-top:118px;padding-bottom:86px;min-height:100vh;transition:background .3s}
+/* ===== Encabezado ===== */
+.encabezado{position:fixed;top:0;left:0;right:0;z-index:1040;
+  background:linear-gradient(135deg,var(--azul) 0%,var(--azul-2) 60%,var(--azul-3) 100%);
+  color:#fff;padding:10px 14px 8px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.logo-caja{display:flex;align-items:center;gap:10px}
+.logo-icono{width:42px;height:42px;border-radius:12px;background:var(--naranja);
+  display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex:0 0 42px;
+  box-shadow:0 3px 8px rgba(0,0,0,.3)}
+.logo-nombre{line-height:1.1}
+.logo-nombre b{font-size:15px;display:block;letter-spacing:.3px}
+.logo-nombre span{font-size:11px;color:var(--naranja-2);font-weight:600;letter-spacing:.5px}
+.reloj{font-size:11px;color:#C8D6EC;margin-top:6px;display:flex;align-items:center;gap:6px}
+.btn-encabezado{background:rgba(255,255,255,.12);border:none;color:#fff;width:38px;height:38px;
+  border-radius:10px;font-size:15px}
+.btn-encabezado:active{background:rgba(255,255,255,.28)}
+/* ===== Navegación inferior ===== */
+.nav-inferior{position:fixed;bottom:0;left:0;right:0;z-index:1040;background:var(--tarjeta);
+  border-top:1px solid var(--borde);display:flex;justify-content:space-around;
+  padding:6px 4px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(11,37,69,.10)}
+.nav-item{background:none;border:none;color:var(--texto-suave);font-size:10.5px;font-weight:600;
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 10px;border-radius:12px;
+  transition:color .2s}
+.nav-item i{font-size:18px}
+.nav-item.activo{color:var(--naranja)}
+/* ===== Tarjetas ===== */
+.tarjeta{background:var(--tarjeta);border:1px solid var(--borde);border-radius:16px;
+  box-shadow:var(--sombra);padding:14px}
+.tarjeta-kpi{position:relative;overflow:hidden}
+.tarjeta-kpi .kpi-icono{position:absolute;right:10px;top:10px;width:34px;height:34px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff}
+.kpi-titulo{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--texto-suave)}
+.kpi-valor{font-size:20px;font-weight:800;margin-top:4px}
+.kpi-sub{font-size:11px;color:var(--texto-suave)}
+.utilidad-positiva{color:var(--verde)} .utilidad-negativa{color:var(--rojo)}
+.titulo-seccion{font-size:15px;font-weight:800;margin:18px 2px 10px;display:flex;align-items:center;gap:8px}
+.titulo-seccion i{color:var(--naranja)}
+/* ===== Listas de registros ===== */
+.fila-registro{background:var(--tarjeta);border:1px solid var(--borde);border-radius:14px;
+  padding:12px 14px;margin-bottom:10px;box-shadow:var(--sombra);cursor:pointer;
+  animation:aparecer .25s ease}
+@keyframes aparecer{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.fila-registro .monto{font-weight:800;font-size:15px}
+.etiqueta{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-block}
+.etiqueta-pagado{background:rgba(21,128,61,.14);color:var(--verde)}
+.etiqueta-pendiente{background:rgba(247,127,0,.15);color:var(--naranja)}
+.etiqueta-clip{background:rgba(29,78,137,.12);color:var(--azul-3)}
+html[data-bs-theme="dark"] .etiqueta-clip{color:#8FBFFF}
+.dato-mini{font-size:11.5px;color:var(--texto-suave);display:inline-flex;align-items:center;gap:4px;margin-right:10px}
+/* ===== Botón flotante ===== */
+.fab{position:fixed;right:16px;bottom:96px;z-index:1039;width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--naranja),#E56B00);color:#fff;border:none;font-size:22px;
+  box-shadow:0 8px 20px rgba(247,127,0,.45);transition:transform .2s}
+.fab:active{transform:scale(.92)}
+.fab-menu{position:fixed;right:16px;bottom:160px;z-index:1039;display:none;flex-direction:column;gap:10px}
+.fab-menu.abierto{display:flex}
+.fab-opcion{border:none;border-radius:30px;padding:10px 16px;font-size:13px;font-weight:700;color:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,.25);display:flex;align-items:center;gap:8px;animation:aparecer .2s ease}
+.fab-ingreso{background:var(--verde)} .fab-gasto{background:var(--rojo)}
+/* ===== Filtros / búsqueda ===== */
+.buscador{position:relative}
+.buscador i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--texto-suave)}
+.buscador input{padding-left:36px;border-radius:12px}
+.fila-filtros{display:flex;gap:8px;overflow-x:auto;padding:2px;margin-top:8px;scrollbar-width:none}
+.fila-filtros::-webkit-scrollbar{display:none}
+.fila-filtros select{min-width:110px;border-radius:20px;font-size:12px;font-weight:600;
+  background-color:var(--tarjeta);border:1px solid var(--borde);color:var(--texto)}
+/* ===== Formularios / modales ===== */
+.form-label{font-size:12px;font-weight:700;color:var(--texto-suave);margin-bottom:3px}
+.form-control,.form-select{background-color:var(--tarjeta);color:var(--texto);border-color:var(--borde);border-radius:10px}
+.form-control:focus,.form-select:focus{border-color:var(--naranja);box-shadow:0 0 0 .2rem rgba(247,127,0,.15)}
+.modal-content{background:var(--tarjeta);color:var(--texto);border-radius:18px;border:1px solid var(--borde)}
+.modal-header{border-color:var(--borde)} .modal-footer{border-color:var(--borde)}
+.btn-naranja{background:var(--naranja);border:none;color:#fff;font-weight:700;border-radius:10px}
+.btn-naranja:hover,.btn-naranja:active{background:#E56B00;color:#fff}
+.btn-azul{background:var(--azul-2);border:none;color:#fff;font-weight:700;border-radius:10px}
+.btn-azul:hover{background:var(--azul-3);color:#fff}
+.btn-suave{background:var(--fondo);border:1px solid var(--borde);color:var(--texto);font-weight:600;border-radius:10px}
+/* ===== Adjuntos ===== */
+.adjunto-chip{display:flex;align-items:center;gap:8px;background:var(--fondo);border:1px solid var(--borde);
+  border-radius:10px;padding:8px 10px;margin-top:8px;font-size:12.5px}
+.adjunto-chip .nombre{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.miniatura{width:38px;height:38px;object-fit:cover;border-radius:8px;border:1px solid var(--borde)}
+.icono-pdf{width:38px;height:38px;border-radius:8px;background:rgba(220,38,38,.12);color:var(--rojo);
+  display:flex;align-items:center;justify-content:center;font-size:17px}
+/* ===== Historial ===== */
+.linea-historial{border-left:2px solid var(--naranja);padding:2px 0 12px 12px;margin-left:6px;position:relative;font-size:12.5px}
+.linea-historial::before{content:"";position:absolute;left:-6px;top:4px;width:10px;height:10px;border-radius:50%;
+  background:var(--naranja)}
+.linea-historial .cuando{color:var(--texto-suave);font-size:11px}
+/* ===== Pantalla PIN ===== */
+#pantallaPin{position:fixed;inset:0;z-index:2000;background:linear-gradient(160deg,var(--azul) 0%,var(--azul-2) 55%,#0E2A52 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:24px}
+.puntos-pin{display:flex;gap:14px;margin:22px 0}
+.punto{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.5);transition:all .15s}
+.punto.lleno{background:var(--naranja);border-color:var(--naranja);transform:scale(1.15)}
+.teclado{display:grid;grid-template-columns:repeat(3,72px);gap:14px}
+.tecla{width:72px;height:72px;border-radius:50%;border:none;background:rgba(255,255,255,.10);color:#fff;
+  font-size:24px;font-weight:700;transition:background .15s}
+.tecla:active{background:var(--naranja)}
+.pin-error{animation:sacudir .35s}
+@keyframes sacudir{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+/* ===== Reportes ===== */
+.tabla-reporte{font-size:12.5px}
+.tabla-reporte th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--texto-suave)}
+.tabla-reporte td,.tabla-reporte th{background:transparent;color:var(--texto);border-color:var(--borde)}
+.barra-rank{height:8px;border-radius:6px;background:linear-gradient(90deg,var(--naranja),var(--naranja-2))}
+/* ===== Toasts ===== */
+#zonaToasts{position:fixed;top:126px;left:50%;transform:translateX(-50%);z-index:2050;width:min(92vw,420px)}
+.aviso{background:var(--azul);color:#fff;border-left:4px solid var(--naranja);border-radius:12px;
+  padding:11px 14px;font-size:13px;margin-bottom:8px;box-shadow:0 8px 24px rgba(0,0,0,.3);
+  display:flex;gap:10px;align-items:center;animation:aparecer .25s ease}
+.pagina{display:none} .pagina.activa{display:block;animation:aparecer .3s ease}
+.grafica-caja{position:relative;height:230px}
+.vacio{text-align:center;color:var(--texto-suave);padding:36px 12px;font-size:13px}
+.vacio i{font-size:34px;display:block;margin-bottom:10px;color:var(--borde)}
+@media(min-width:768px){body{max-width:520px;margin:0 auto}
+  .encabezado,.nav-inferior{max-width:520px;left:50%;transform:translateX(-50%)}
+  .fab,.fab-menu{right:calc(50% - 244px)}}
+</style>
+</head>
+<body>
+
+<!-- ================= PANTALLA PIN ================= -->
+<div id="pantallaPin">
+  <div class="logo-icono" style="width:66px;height:66px;font-size:30px;border-radius:18px"><i class="fa-solid fa-truck-moving"></i></div>
+  <h5 class="mt-3 mb-0 fw-bold text-center">Transport Luis &amp; Katherine</h5>
+  <div id="pinTitulo" class="small mt-2 text-center" style="color:#C8D6EC">Ingresa tu PIN de 4 dígitos</div>
+  <div class="mt-3" style="width:min(320px,88vw)">
+    <input class="form-control text-center mb-2" id="accesoNombre" placeholder="Tu nombre" style="display:none;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#fff">
+    <input class="form-control text-center" type="email" id="accesoCorreo" placeholder="Correo electrónico" list="listaCorreos"
+      style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#fff">
+    <datalist id="listaCorreos"></datalist>
+  </div>
+  <div class="puntos-pin" id="puntosPin">
+    <div class="punto"></div><div class="punto"></div><div class="punto"></div><div class="punto"></div>
+  </div>
+  <div class="teclado">
+    <button class="tecla" onclick="teclaPin('1')">1</button><button class="tecla" onclick="teclaPin('2')">2</button><button class="tecla" onclick="teclaPin('3')">3</button>
+    <button class="tecla" onclick="teclaPin('4')">4</button><button class="tecla" onclick="teclaPin('5')">5</button><button class="tecla" onclick="teclaPin('6')">6</button>
+    <button class="tecla" onclick="teclaPin('7')">7</button><button class="tecla" onclick="teclaPin('8')">8</button><button class="tecla" onclick="teclaPin('9')">9</button>
+    <div></div><button class="tecla" onclick="teclaPin('0')">0</button>
+    <button class="tecla" style="font-size:18px" onclick="teclaPin('borrar')"><i class="fa-solid fa-delete-left"></i></button>
+  </div>
+</div>
+
+<!-- ================= ENCABEZADO ================= -->
+<header class="encabezado">
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="logo-caja">
+      <div class="logo-icono"><i class="fa-solid fa-truck-moving"></i></div>
+      <div class="logo-nombre"><b>Transport Luis &amp; Katherine</b><span>CARGA PESADA · PANAMÁ</span></div>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn-encabezado" id="btnTema" title="Modo oscuro"><i class="fa-solid fa-moon"></i></button>
+      <button class="btn-encabezado" onclick="bloquear()" title="Bloquear"><i class="fa-solid fa-lock"></i></button>
+    </div>
+  </div>
+  <div class="reloj"><i class="fa-regular fa-clock"></i><span id="fechaHora">—</span></div>
+</header>
+
+<div id="zonaToasts"></div>
+
+<!-- ================= PÁGINAS ================= -->
+<main class="container-fluid px-3">
+
+  <!-- ===== INICIO ===== -->
+  <section class="pagina activa" id="pagina-inicio">
+    <div class="row g-2 mt-1">
+      <div class="col-6"><div class="tarjeta tarjeta-kpi">
+        <div class="kpi-icono" style="background:var(--verde)"><i class="fa-solid fa-arrow-trend-up"></i></div>
+        <div class="kpi-titulo">Ingresos</div><div class="kpi-valor" id="kpiIngresos">B/. 0.00</div>
+        <div class="kpi-sub" id="kpiIngresosSub">0 registros</div></div></div>
+      <div class="col-6"><div class="tarjeta tarjeta-kpi">
+        <div class="kpi-icono" style="background:var(--rojo)"><i class="fa-solid fa-arrow-trend-down"></i></div>
+        <div class="kpi-titulo">Gastos</div><div class="kpi-valor" id="kpiGastos">B/. 0.00</div>
+        <div class="kpi-sub" id="kpiGastosSub">0 registros</div></div></div>
+      <div class="col-12"><div class="tarjeta tarjeta-kpi">
+        <div class="kpi-icono" style="background:var(--naranja)"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="kpi-titulo">Utilidad</div><div class="kpi-valor" id="kpiUtilidad">B/. 0.00</div>
+        <div class="kpi-sub" id="kpiMargen">Margen: —</div></div></div>
+      <div class="col-4"><div class="tarjeta text-center py-3">
+        <i class="fa-solid fa-route" style="color:var(--naranja)"></i>
+        <div class="kpi-valor" style="font-size:17px" id="kpiViajes">0</div><div class="kpi-sub">Viajes</div></div></div>
+      <div class="col-4"><div class="tarjeta text-center py-3">
+        <i class="fa-solid fa-file-invoice" style="color:var(--naranja)"></i>
+        <div class="kpi-valor" style="font-size:17px" id="kpiFacturas">0</div><div class="kpi-sub">Facturas</div></div></div>
+      <div class="col-4"><div class="tarjeta text-center py-3">
+        <i class="fa-solid fa-hourglass-half" style="color:var(--naranja)"></i>
+        <div class="kpi-valor" style="font-size:17px" id="kpiPendientes">0</div><div class="kpi-sub">Pendientes</div></div></div>
+    </div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-chart-pie"></i> Ingresos vs Gastos</div>
+    <div class="tarjeta"><div class="grafica-caja"><canvas id="graficaIvsG"></canvas></div></div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-chart-line"></i> Evolución mensual <select id="anioInicio" class="form-select form-select-sm w-auto ms-auto" onchange="pintarInicio()"></select></div>
+    <div class="tarjeta"><div class="grafica-caja"><canvas id="graficaMensual"></canvas></div></div>
+  </section>
+
+  <!-- ===== INGRESOS ===== -->
+  <section class="pagina" id="pagina-ingresos">
+    <div class="d-flex gap-2 mt-1 mb-2">
+      <button class="btn btn-naranja btn-sm flex-fill" onclick="document.getElementById('archivoIngresos').click()"><i class="fa-solid fa-file-excel me-1"></i> Importar Excel de ingresos</button>
+      <button class="btn btn-azul btn-sm" onclick="abrirFormIngreso()"><i class="fa-solid fa-plus"></i></button>
+    </div>
+    <input type="file" id="archivoIngresos" accept=".xlsx,.xls" hidden>
+    <div class="buscador"><i class="fa-solid fa-magnifying-glass"></i>
+      <input class="form-control" id="buscarIngresos" placeholder="Buscar cliente, factura, camión, conductor, ruta, fecha…"></div>
+    <div class="fila-filtros">
+      <select class="form-select form-select-sm" id="fIngMes"></select>
+      <select class="form-select form-select-sm" id="fIngAnio"></select>
+      <select class="form-select form-select-sm" id="fIngCliente"></select>
+      <select class="form-select form-select-sm" id="fIngCamion"></select>
+      <select class="form-select form-select-sm" id="fIngEstado">
+        <option value="">Estado: todos</option><option>Pagado</option><option>Pendiente</option></select>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+      <span class="kpi-sub" id="resumenIngresos"></span>
+      <button class="btn btn-suave btn-sm" onclick="limpiarFiltros('ing')"><i class="fa-solid fa-broom me-1"></i>Limpiar</button>
+    </div>
+    <div id="listaIngresos" class="mt-2"></div>
+  </section>
+
+  <!-- ===== GASTOS ===== -->
+  <section class="pagina" id="pagina-gastos">
+    <div class="d-flex gap-2 mt-1 mb-2">
+      <button class="btn btn-naranja btn-sm flex-fill" onclick="document.getElementById('archivoGastos').click()"><i class="fa-solid fa-file-excel me-1"></i> Importar Excel de gastos</button>
+      <button class="btn btn-azul btn-sm" onclick="abrirFormGasto()"><i class="fa-solid fa-plus"></i></button>
+    </div>
+    <input type="file" id="archivoGastos" accept=".xlsx,.xls" hidden>
+    <div class="buscador"><i class="fa-solid fa-magnifying-glass"></i>
+      <input class="form-control" id="buscarGastos" placeholder="Buscar proveedor, factura, camión, conductor, fecha…"></div>
+    <div class="fila-filtros">
+      <select class="form-select form-select-sm" id="fGasMes"></select>
+      <select class="form-select form-select-sm" id="fGasAnio"></select>
+      <select class="form-select form-select-sm" id="fGasTipo"></select>
+      <select class="form-select form-select-sm" id="fGasCamion"></select>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-2 px-1">
+      <span class="kpi-sub" id="resumenGastos"></span>
+      <button class="btn btn-suave btn-sm" onclick="limpiarFiltros('gas')"><i class="fa-solid fa-broom me-1"></i>Limpiar</button>
+    </div>
+    <div id="listaGastos" class="mt-2"></div>
+  </section>
+
+  <!-- ===== REPORTES ===== -->
+  <section class="pagina" id="pagina-reportes">
+    <div class="d-flex align-items-center gap-2 mt-1">
+      <span class="fw-bold" style="font-size:14px"><i class="fa-solid fa-filter me-1" style="color:var(--naranja)"></i>Período:</span>
+      <select id="anioReporte" class="form-select form-select-sm w-auto" onchange="pintarReportes()"></select>
+      <button class="btn btn-naranja btn-sm ms-auto" onclick="exportarPDF()"><i class="fa-solid fa-file-pdf me-1"></i>PDF</button>
+    </div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-file-invoice-dollar"></i> Estado de resultados</div>
+    <div class="tarjeta"><table class="table table-sm tabla-reporte mb-0" id="tablaEstado"></table></div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-hand-holding-dollar"></i> Cuentas por cobrar</div>
+    <div class="tarjeta" id="cuentasCobrar"></div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-calendar-days"></i> Utilidad mensual</div>
+    <div class="tarjeta"><div class="grafica-caja"><canvas id="grUtilidadMensual"></canvas></div></div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-truck"></i> Gastos por camión</div>
+    <div class="tarjeta"><div class="grafica-caja"><canvas id="grGastosCamion"></canvas></div></div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-id-card"></i> Gastos por conductor</div>
+    <div class="tarjeta"><table class="table table-sm tabla-reporte mb-0" id="tablaConductor"></table></div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-tags"></i> Gastos por tipo</div>
+    <div class="tarjeta"><div class="grafica-caja"><canvas id="grGastosTipo"></canvas></div></div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-handshake"></i> Ingresos por cliente</div>
+    <div class="tarjeta"><div class="grafica-caja"><canvas id="grIngresosCliente"></canvas></div></div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-ranking-star"></i> Ranking de clientes</div>
+    <div class="tarjeta" id="rankClientes"></div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-trophy"></i> Ranking de camiones (utilidad)</div>
+    <div class="tarjeta" id="rankCamiones"></div>
+  </section>
+
+  <!-- ===== MÁS / AJUSTES ===== -->
+  <section class="pagina" id="pagina-mas">
+    <div class="tarjeta mt-2 d-flex align-items-center gap-2" id="tarjetaUsuario">
+      <div class="logo-icono" style="width:38px;height:38px;font-size:16px;flex:0 0 38px"><i class="fa-solid fa-user"></i></div>
+      <div style="min-width:0"><div class="fw-bold text-truncate" id="usuarioNombre">—</div>
+        <div class="kpi-sub text-truncate" id="usuarioCorreoRol">—</div></div>
+      <button class="btn btn-suave btn-sm ms-auto" onclick="bloquear()"><i class="fa-solid fa-right-from-bracket me-1"></i>Salir</button>
+    </div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-folder-open"></i> Documentos importantes</div>
+    <div class="tarjeta">
+      <button class="btn btn-naranja w-100 mb-1" onclick="abrirFormDocumento()"><i class="fa-solid fa-file-circle-plus me-2"></i>Guardar documento</button>
+      <div class="kpi-sub text-center mb-2">Avisos de operación, declaraciones, pólizas, permisos…</div>
+      <div id="listaDocumentos"></div>
+    </div>
+
+    <div id="seccionAdmin" style="display:none">
+      <div class="titulo-seccion"><i class="fa-solid fa-user-shield"></i> Panel del administrador</div>
+      <div class="tarjeta mb-2">
+        <div class="fw-bold mb-1" style="font-size:13px"><i class="fa-solid fa-tower-broadcast me-1" style="color:var(--verde)"></i>En línea ahora (este dispositivo)</div>
+        <div id="listaVivos" class="kpi-sub">—</div>
+        <hr style="border-color:var(--borde)">
+        <div class="fw-bold mb-1" style="font-size:13px"><i class="fa-solid fa-users me-1" style="color:var(--naranja)"></i>Usuarios</div>
+        <div id="listaUsuarios"></div>
+        <button class="btn btn-azul btn-sm w-100 mt-2" onclick="abrirFormUsuario()"><i class="fa-solid fa-user-plus me-1"></i>Agregar usuario</button>
+        <hr style="border-color:var(--borde)">
+        <div class="fw-bold mb-1" style="font-size:13px"><i class="fa-solid fa-clock-rotate-left me-1" style="color:var(--naranja)"></i>Registro de accesos</div>
+        <div id="listaAccesos" class="kpi-sub"></div>
+      </div>
+    </div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-download"></i> Exportaciones</div>
+    <div class="tarjeta d-grid gap-2">
+      <button class="btn btn-azul" onclick="exportarExcel()"><i class="fa-solid fa-file-excel me-2"></i>Exportar todo a Excel (.xlsx)</button>
+      <button class="btn btn-suave" onclick="exportarCSV('ingresos')"><i class="fa-solid fa-file-csv me-2"></i>Exportar ingresos (CSV)</button>
+      <button class="btn btn-suave" onclick="exportarCSV('gastos')"><i class="fa-solid fa-file-csv me-2"></i>Exportar gastos (CSV)</button>
+      <button class="btn btn-suave" onclick="exportarPDF()"><i class="fa-solid fa-file-pdf me-2"></i>Reporte en PDF (imprimir)</button>
+    </div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-database"></i> Respaldo</div>
+    <div class="tarjeta d-grid gap-2">
+      <button class="btn btn-naranja" onclick="respaldar()"><i class="fa-solid fa-cloud-arrow-down me-2"></i>Respaldar base de datos (JSON)</button>
+      <button class="btn btn-suave solo-admin" onclick="document.getElementById('archivoRespaldo').click()"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Restaurar respaldo</button>
+      <input type="file" id="archivoRespaldo" accept=".json" hidden>
+    </div>
+
+    <div class="titulo-seccion"><i class="fa-solid fa-gear"></i> Configuración</div>
+    <div class="tarjeta d-grid gap-2">
+      <button class="btn btn-suave" id="btnTema2"><i class="fa-solid fa-circle-half-stroke me-2"></i>Cambiar modo claro / oscuro</button>
+      <button class="btn btn-suave" onclick="cambiarPin()"><i class="fa-solid fa-key me-2"></i>Cambiar mi PIN de acceso</button>
+      <button class="btn btn-outline-danger solo-admin" onclick="borrarTodo()"><i class="fa-solid fa-trash me-2"></i>Borrar todos los datos</button>
+    </div>
+    <p class="text-center kpi-sub mt-4 mb-0">Transport Luis &amp; Katherine · v1.0<br>Los datos se guardan en el servidor: todos los usuarios ven la misma información.</p>
+  </section>
+</main>
+
+<!-- ================= FAB ================= -->
+<div class="fab-menu" id="fabMenu">
+  <button class="fab-opcion fab-ingreso" onclick="cerrarFab();abrirFormIngreso()"><i class="fa-solid fa-arrow-trend-up"></i> Nuevo ingreso</button>
+  <button class="fab-opcion fab-gasto" onclick="cerrarFab();abrirFormGasto()"><i class="fa-solid fa-arrow-trend-down"></i> Nuevo gasto</button>
+</div>
+<button class="fab" id="botonFab"><i class="fa-solid fa-plus"></i></button>
+
+<!-- ================= NAV INFERIOR ================= -->
+<nav class="nav-inferior">
+  <button class="nav-item activo" data-pagina="inicio"><i class="fa-solid fa-house"></i>Inicio</button>
+  <button class="nav-item" data-pagina="ingresos"><i class="fa-solid fa-sack-dollar"></i>Ingresos</button>
+  <button class="nav-item" data-pagina="gastos"><i class="fa-solid fa-money-bill-transfer"></i>Gastos</button>
+  <button class="nav-item" data-pagina="reportes"><i class="fa-solid fa-chart-column"></i>Reportes</button>
+  <button class="nav-item" data-pagina="mas"><i class="fa-solid fa-ellipsis"></i>Más</button>
+</nav>
+
+<!-- ================= MODAL FORMULARIO INGRESO ================= -->
+<div class="modal fade" id="modalIngreso" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-content"><div class="modal-header py-2">
+    <h6 class="modal-title fw-bold" id="tituloFormIngreso"><i class="fa-solid fa-sack-dollar me-2" style="color:var(--naranja)"></i>Nuevo ingreso</h6>
+    <button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <input type="hidden" id="ingId">
+    <div class="row g-2">
+      <div class="col-6"><label class="form-label">Fecha *</label><input type="date" class="form-control" id="ingFecha"></div>
+      <div class="col-6"><label class="form-label">N° de factura</label><input class="form-control" id="ingFactura" placeholder="0001"></div>
+      <div class="col-12"><label class="form-label">Cliente *</label><input class="form-control" id="ingCliente" list="listaClientes" placeholder="Nombre del cliente"><datalist id="listaClientes"></datalist></div>
+      <div class="col-6"><label class="form-label">Viaje</label><input class="form-control" id="ingViaje" placeholder="V-001"></div>
+      <div class="col-6"><label class="form-label">Camión</label><input class="form-control" id="ingCamion" list="listaCamiones" placeholder="Placa / unidad"><datalist id="listaCamiones"></datalist></div>
+      <div class="col-6"><label class="form-label">Conductor</label><input class="form-control" id="ingConductor" list="listaConductores"><datalist id="listaConductores"></datalist></div>
+      <div class="col-6"><label class="form-label">Monto (B/.) *</label><input type="number" step="0.01" min="0" class="form-control" id="ingMonto" placeholder="0.00"></div>
+      <div class="col-12"><label class="form-label">Ruta</label><input class="form-control" id="ingRuta" placeholder="Colón → Panamá"></div>
+      <div class="col-12"><label class="form-label">Estado</label><select class="form-select" id="ingEstado" onchange="document.getElementById('cajaFechaPago').style.display=this.value==='Pagado'?'':'none'"><option>Pagado</option><option>Pendiente</option></select></div>
+      <div class="col-12" id="cajaFechaPago"><label class="form-label">Fecha de pago</label><input type="date" class="form-control" id="ingFechaPago"></div>
+      <div class="col-12"><label class="form-label">Observaciones</label><textarea class="form-control" id="ingObs" rows="2"></textarea></div>
+      <div class="col-12"><label class="form-label">Factura adjunta</label>
+        <div class="d-flex gap-2">
+          <button class="btn btn-suave btn-sm flex-fill" onclick="capturar('camara')"><i class="fa-solid fa-camera me-1"></i>Cámara</button>
+          <button class="btn btn-suave btn-sm flex-fill" onclick="capturar('galeria')"><i class="fa-solid fa-image me-1"></i>Galería</button>
+          <button class="btn btn-suave btn-sm flex-fill" onclick="capturar('pdf')"><i class="fa-solid fa-file-pdf me-1"></i>PDF</button>
+        </div>
+        <div id="adjuntosIngreso"></div></div>
+    </div></div>
+  <div class="modal-footer py-2">
+    <button class="btn btn-suave" data-bs-dismiss="modal">Cancelar</button>
+    <button class="btn btn-naranja" onclick="guardarIngreso()"><i class="fa-solid fa-floppy-disk me-1"></i>Guardar</button></div>
+</div></div></div>
+
+<!-- ================= MODAL FORMULARIO GASTO ================= -->
+<div class="modal fade" id="modalGasto" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-content"><div class="modal-header py-2">
+    <h6 class="modal-title fw-bold" id="tituloFormGasto"><i class="fa-solid fa-money-bill-transfer me-2" style="color:var(--naranja)"></i>Nuevo gasto</h6>
+    <button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <input type="hidden" id="gasId">
+    <div class="row g-2">
+      <div class="col-6"><label class="form-label">Fecha *</label><input type="date" class="form-control" id="gasFecha"></div>
+      <div class="col-6"><label class="form-label">Monto (B/.) *</label><input type="number" step="0.01" min="0" class="form-control" id="gasMonto" placeholder="0.00"></div>
+      <div class="col-12"><label class="form-label">Tipo de gasto *</label>
+        <select class="form-select" id="gasTipo">
+          <option>Combustible</option><option>Repuestos</option><option>Mantenimiento</option><option>Llantas</option>
+          <option>Peajes</option><option>Salarios</option><option>Viáticos</option><option>Seguros</option>
+          <option>Impuestos</option><option>Permisos y trámites</option><option>Alimentación</option><option>Otro</option>
+        </select></div>
+      <div class="col-6"><label class="form-label">Camión</label><input class="form-control" id="gasCamion" list="listaCamiones" placeholder="Placa / unidad"></div>
+      <div class="col-6"><label class="form-label">Conductor</label><input class="form-control" id="gasConductor" list="listaConductores"></div>
+      <div class="col-12"><label class="form-label">Proveedor</label><input class="form-control" id="gasProveedor" list="listaProveedores" placeholder="Nombre del proveedor"><datalist id="listaProveedores"></datalist></div>
+      <div class="col-12"><label class="form-label">N° de factura</label><input class="form-control" id="gasFactura"></div>
+      <div class="col-12"><label class="form-label">Observaciones</label><textarea class="form-control" id="gasObs" rows="2"></textarea></div>
+      <div class="col-12"><label class="form-label">Factura adjunta</label>
+        <div class="d-flex gap-2">
+          <button class="btn btn-suave btn-sm flex-fill" onclick="capturar('camara')"><i class="fa-solid fa-camera me-1"></i>Cámara</button>
+          <button class="btn btn-suave btn-sm flex-fill" onclick="capturar('galeria')"><i class="fa-solid fa-image me-1"></i>Galería</button>
+          <button class="btn btn-suave btn-sm flex-fill" onclick="capturar('pdf')"><i class="fa-solid fa-file-pdf me-1"></i>PDF</button>
+        </div>
+        <div id="adjuntosGasto"></div></div>
+    </div></div>
+  <div class="modal-footer py-2">
+    <button class="btn btn-suave" data-bs-dismiss="modal">Cancelar</button>
+    <button class="btn btn-naranja" onclick="guardarGasto()"><i class="fa-solid fa-floppy-disk me-1"></i>Guardar</button></div>
+</div></div></div>
+
+<!-- Entradas ocultas para adjuntar archivos -->
+<input type="file" id="entradaCamara" accept="image/*" capture="environment" hidden>
+<input type="file" id="entradaGaleria" accept="image/*" hidden>
+<input type="file" id="entradaPdf" accept="application/pdf" hidden>
+
+<!-- ================= MODAL DETALLE ================= -->
+<div class="modal fade" id="modalDetalle" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-content"><div class="modal-header py-2">
+    <h6 class="modal-title fw-bold" id="tituloDetalle">Detalle</h6>
+    <button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body" id="cuerpoDetalle"></div>
+  <div class="modal-footer py-2 justify-content-between">
+    <button class="btn btn-outline-danger btn-sm" onclick="eliminarActual()"><i class="fa-solid fa-trash me-1"></i>Eliminar</button>
+    <div>
+      <button class="btn btn-suave btn-sm" data-bs-dismiss="modal">Cerrar</button>
+      <button class="btn btn-naranja btn-sm" onclick="editarActual()"><i class="fa-solid fa-pen me-1"></i>Editar</button>
+    </div></div>
+</div></div></div>
+
+<!-- ================= MODAL VISOR DE FACTURA ================= -->
+<div class="modal fade" id="modalVisor" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down">
+  <div class="modal-content"><div class="modal-header py-2">
+    <h6 class="modal-title fw-bold" id="tituloVisor">Factura</h6>
+    <button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body p-2 text-center" id="cuerpoVisor"></div>
+  <div class="modal-footer py-2">
+    <button class="btn btn-suave btn-sm" data-bs-dismiss="modal">Cerrar</button>
+    <button class="btn btn-naranja btn-sm" id="btnDescargarVisor"><i class="fa-solid fa-download me-1"></i>Descargar</button></div>
+</div></div></div>
+
+<!-- ================= MODAL CLIENTE (CUENTAS POR COBRAR) ================= -->
+<div class="modal fade" id="modalCliente" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-content"><div class="modal-header py-2">
+    <h6 class="modal-title fw-bold" id="tituloCliente">Cliente</h6>
+    <button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body" id="cuerpoCliente"></div>
+  <div class="modal-footer py-2">
+    <button class="btn btn-suave btn-sm" data-bs-dismiss="modal">Cerrar</button></div>
+</div></div></div>
+
+<!-- ================= MODAL REGISTRAR PAGO ================= -->
+<div class="modal fade" id="modalPago" tabindex="-1"><div class="modal-dialog modal-dialog-centered">
+  <div class="modal-content"><div class="modal-header py-2">
+    <h6 class="modal-title fw-bold"><i class="fa-solid fa-circle-check me-2" style="color:var(--verde)"></i>Registrar pago</h6>
+    <button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <div id="resumenPago" class="mb-2"></div>
+    <label class="form-label">¿En qué fecha pagó el cliente?</label>
+    <input type="date" class="form-control" id="pagoFecha">
+  </div>
+  <div class="modal-footer py-2">
+    <button class="btn btn-suave" data-bs-dismiss="modal">Cancelar</button>
+    <button class="btn btn-naranja" onclick="confirmarPago()"><i class="fa-solid fa-circle-check me-1"></i>Marcar como pagada</button></div>
+</div></div></div>
+
+<!-- ================= MODAL DOCUMENTO IMPORTANTE ================= -->
+<div class="modal fade" id="modalDocumento" tabindex="-1"><div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-content"><div class="modal-header py-2">
+    <h6 class="modal-title fw-bold"><i class="fa-solid fa-folder-open me-2" style="color:var(--naranja)"></i>Guardar documento</h6>
+    <button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><div class="row g-2">
+    <div class="col-12"><label class="form-label">Nombre del documento *</label>
+      <input class="form-control" id="docNombre" placeholder="Aviso de operación 2026"></div>
+    <div class="col-12"><label class="form-label">Categoría</label>
+      <select class="form-select" id="docCategoria">
+        <option>Aviso de operación</option><option>Declaración de renta</option><option>Declaración ITBMS</option>
+        <option>Paz y salvo</option><option>Póliza de seguro</option><option>Contrato</option>
+        <option>Permiso / placa</option><option>Registro vehicular</option><option>Otro</option></select></div>
+    <div class="col-12"><label class="form-label">Fecha de vencimiento (opcional)</label>
+      <input type="date" class="form-control" id="docVence"></div>
+    <div class="col-12"><label class="form-label">Notas</label>
+      <textarea class="form-control" id="docNotas" rows="2"></textarea></div>
+    <div class="col-12"><label class="form-label">Archivo</label>
+      <div class="d-flex gap-2">
+        <button class="btn btn-suave btn-sm flex-fill" onclick="capturar('camara')"><i class="fa-solid fa-camera me-1"></i>Cámara</button>
+        <button class="btn btn-suave btn-sm flex-fill" onclick="capturar('galeria')"><i class="fa-solid fa-image me-1"></i>Galería</button>
+        <button class="btn btn-suave btn-sm flex-fill" onclick="capturar('pdf')"><i class="fa-solid fa-file-pdf me-1"></i>PDF</button>
+      </div>
+      <div id="adjuntosDocumento"></div></div>
+  </div></div>
+  <div class="modal-footer py-2">
+    <button class="btn btn-suave" data-bs-dismiss="modal">Cancelar</button>
+    <button class="btn btn-naranja" onclick="guardarDocumento()"><i class="fa-solid fa-floppy-disk me-1"></i>Guardar</button></div>
+</div></div></div>
+
+<!-- ================= MODAL NUEVO USUARIO ================= -->
+<div class="modal fade" id="modalUsuario" tabindex="-1"><div class="modal-dialog modal-dialog-centered">
+  <div class="modal-content"><div class="modal-header py-2">
+    <h6 class="modal-title fw-bold"><i class="fa-solid fa-user-plus me-2" style="color:var(--naranja)"></i>Nuevo usuario</h6>
+    <button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><div class="row g-2">
+    <div class="col-12"><label class="form-label">Nombre *</label><input class="form-control" id="usrNombre"></div>
+    <div class="col-12"><label class="form-label">Correo electrónico *</label><input type="email" class="form-control" id="usrCorreo"></div>
+    <div class="col-6"><label class="form-label">PIN (4 dígitos) *</label>
+      <input class="form-control" id="usrPin" inputmode="numeric" maxlength="4" placeholder="0000"></div>
+    <div class="col-6"><label class="form-label">Rol</label>
+      <select class="form-select" id="usrRol"><option value="usuario">Usuario</option><option value="admin">Administrador</option></select></div>
+  </div></div>
+  <div class="modal-footer py-2">
+    <button class="btn btn-suave" data-bs-dismiss="modal">Cancelar</button>
+    <button class="btn btn-naranja" onclick="guardarUsuario()"><i class="fa-solid fa-floppy-disk me-1"></i>Crear usuario</button></div>
+</div></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script>
+if(typeof bootstrap==='undefined')document.write('<script src="https:\/\/cdn.jsdelivr.net\/npm\/bootstrap@5.3.3\/dist\/js\/bootstrap.bundle.min.js"><\/script>');
+if(typeof XLSX==='undefined')document.write('<script src="https:\/\/cdn.jsdelivr.net\/npm\/xlsx@0.18.5\/dist\/xlsx.full.min.js"><\/script>');
+// Respaldo para los iconos: si Font Awesome no cargó, se intenta desde otro CDN
+window.addEventListener('load',()=>{
+  const prueba=document.createElement('i');
+  prueba.className='fa-solid fa-house'; prueba.style.position='absolute'; prueba.style.visibility='hidden';
+  document.body.appendChild(prueba);
+  const fuente=getComputedStyle(prueba).fontFamily||'';
+  if(!/font awesome/i.test(fuente)){
+    const l=document.createElement('link'); l.rel='stylesheet';
+    l.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css';
+    document.head.appendChild(l);
+  }
+  prueba.remove();
+});
+</script>
+<script>
+/* ============================================================
+   TRANSPORT LUIS & KATHERINE · Control financiero
+   Parte 1: base de datos (IndexedDB), estado y utilidades
+============================================================ */
+let db=null, ingresos=[], gastos=[], documentos=[], adjuntosTemp=[], detalleActual=null;
+let graficas={}, token=localStorage.getItem('tlk_token')||'';
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+/* ===== Comunicación con el servidor ===== */
+async function api(ruta,metodo='GET',cuerpo){
+  const r=await fetch('/api/'+ruta,{method:metodo,
+    headers:Object.assign({'Content-Type':'application/json'},token?{'Authorization':'Bearer '+token}:{}),
+    body:cuerpo?JSON.stringify(cuerpo):undefined});
+  if(r.status===401){cerrarSesionLocal();throw new Error('Sesión expirada');}
+  const datos=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(datos.error||('Error '+r.status));
+  return datos;
+}
+async function dbTodos(tienda){return api('datos/'+tienda);}
+async function dbGuardar(tienda,obj){return api('datos/'+tienda+'/'+obj.id,'PUT',obj);}
+async function dbBorrar(tienda,id){return api('datos/'+tienda+'/'+id,'DELETE');}
+async function dbObtener(tienda,id){try{return await api('datos/'+tienda+'/'+id)}catch(e){return null}}
+async function dbVaciar(tienda){return api('datos/'+tienda,'DELETE');}
+async function metaArchivos(refId){return api('archivos-meta'+(refId?('?refId='+encodeURIComponent(refId)):''));}
+async function cargarDatos(){
+  [ingresos,gastos,documentos]=await Promise.all([dbTodos('ingresos'),dbTodos('gastos'),dbTodos('documentos')]);
+  db=true;
+}
+const nuevoId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const dinero=n=>'B/. '+(Number(n)||0).toLocaleString('es-PA',{minimumFractionDigits:2,maximumFractionDigits:2});
+const norm=t=>(t||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+function fechaBonita(iso){
+  if(!iso) return '—';
+  const [a,m,d]=iso.split('-').map(Number);
+  if(!a||!m||!d) return iso;
+  return `${String(d).padStart(2,'0')} ${MESES[m-1]?.slice(0,3).toLowerCase()||''} ${a}`;
+}
+function aviso(msj,icono='fa-circle-check'){
+  const z=document.getElementById('zonaToasts');
+  const d=document.createElement('div');
+  d.className='aviso';
+  d.innerHTML=`<i class="fa-solid ${icono}" style="color:var(--naranja-2)"></i><div>${msj}</div>`;
+  z.appendChild(d);
+  setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .4s';setTimeout(()=>d.remove(),400)},3200);
+}
+function escapar(t){const d=document.createElement('div');d.textContent=t==null?'':String(t);return d.innerHTML;}
+
+/* ===== Fecha y hora en vivo ===== */
+function tictac(){
+  const f=new Date();
+  const dias=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  document.getElementById('fechaHora').textContent=
+    `${dias[f.getDay()]}, ${f.getDate()} de ${MESES[f.getMonth()].toLowerCase()} de ${f.getFullYear()} · `+
+    f.toLocaleTimeString('es-PA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(tictac,1000); tictac();
+
+/* ===== Tema claro / oscuro ===== */
+function aplicarTema(t){
+  document.documentElement.setAttribute('data-bs-theme',t);
+  localStorage.setItem('tlk_tema',t);
+  document.querySelector('#btnTema i').className=t==='dark'?'fa-solid fa-sun':'fa-solid fa-moon';
+  if(db){pintarInicio();pintarReportes();}
+}
+function alternarTema(){aplicarTema(document.documentElement.getAttribute('data-bs-theme')==='dark'?'light':'dark');}
+document.getElementById('btnTema').onclick=alternarTema;
+document.getElementById('btnTema2').onclick=alternarTema;
+aplicarTema(localStorage.getItem('tlk_tema')||'light');
+
+/* ============================================================
+   Parte 2: usuarios, acceso, roles y sesiones
+============================================================ */
+let pinBuffer='', accesoModo='login', pinPaso1='', usuarioActual=null;
+async function estadoPinInicial(){
+  document.getElementById('accesoCorreo').value=localStorage.getItem('tlk_ultimo_correo')||'';
+  try{
+    const e=await api('estado');
+    if(!e.hayUsuarios){
+      accesoModo='crear-admin';
+      document.getElementById('accesoNombre').style.display='';
+      document.getElementById('pinTitulo').textContent='Bienvenido. Crea la cuenta de ADMINISTRADOR: escribe tu nombre, tu correo y un PIN de 4 dígitos';
+    }else{
+      accesoModo='login';
+      document.getElementById('accesoNombre').style.display='none';
+      document.getElementById('pinTitulo').textContent='Escribe tu correo y tu PIN de 4 dígitos';
+    }
+  }catch(err){
+    document.getElementById('pinTitulo').textContent='No se pudo conectar con el servidor. Revisa tu internet y recarga.';
+  }
+}
+function pintarPuntos(){
+  document.querySelectorAll('#puntosPin .punto').forEach((p,i)=>p.classList.toggle('lleno',i<pinBuffer.length));
+}
+function teclaPin(t){
+  if(t==='borrar'){pinBuffer=pinBuffer.slice(0,-1);pintarPuntos();return;}
+  if(pinBuffer.length>=4)return;
+  pinBuffer+=t; pintarPuntos();
+  if(pinBuffer.length===4) setTimeout(validarPin,180);
+}
+async function validarPin(){
+  const correo=document.getElementById('accesoCorreo').value.trim().toLowerCase();
+  const nombre=document.getElementById('accesoNombre').value.trim();
+  try{
+    if(accesoModo==='crear-admin'||accesoModo==='crear-admin-conf'){
+      if(!nombre||!correo.includes('@')){errorPin('Primero escribe tu nombre y un correo válido, luego el PIN');return;}
+      if(accesoModo==='crear-admin'){
+        pinPaso1=pinBuffer; pinBuffer=''; pintarPuntos(); accesoModo='crear-admin-conf';
+        document.getElementById('pinTitulo').textContent='Confirma tu PIN';return;
+      }
+      if(pinBuffer!==pinPaso1){errorPin('Los PIN no coinciden, intenta de nuevo');accesoModo='crear-admin';return;}
+      const r=await api('registro-admin','POST',{nombre,correo,pin:pinBuffer});
+      aviso('Cuenta de administrador creada. ¡Bienvenido, '+escapar(nombre)+'!','fa-user-shield');
+      await iniciarSesion(r);return;
+    }
+    if(accesoModo==='cambiar'||accesoModo==='cambiar-conf'){
+      if(accesoModo==='cambiar'){
+        pinPaso1=pinBuffer; pinBuffer=''; pintarPuntos(); accesoModo='cambiar-conf';
+        document.getElementById('pinTitulo').textContent='Confirma tu nuevo PIN';return;
+      }
+      if(pinBuffer!==pinPaso1){errorPin('Los PIN no coinciden');accesoModo='cambiar';return;}
+      await api('mi-pin','PUT',{pin:pinBuffer});
+      aviso('Tu PIN fue actualizado','fa-key');
+      document.getElementById('pantallaPin').style.display='none';
+      pinBuffer=''; accesoModo='login'; pintarPuntos();return;
+    }
+    // Inicio de sesión normal
+    if(!correo.includes('@')){errorPin('Escribe tu correo electrónico y luego tu PIN');return;}
+    const r=await api('login','POST',{correo,pin:pinBuffer});
+    await iniciarSesion(r);
+  }catch(err){errorPin(err.message||'No se pudo conectar con el servidor');}
+}
+async function iniciarSesion(r){
+  token=r.token; localStorage.setItem('tlk_token',token);
+  usuarioActual=r.usuario;
+  localStorage.setItem('tlk_ultimo_correo',usuarioActual.correo);
+  document.getElementById('pantallaPin').style.display='none';
+  pinBuffer=''; accesoModo='login'; pintarPuntos();
+  document.getElementById('accesoNombre').style.display='none';
+  await cargarDatos();
+  aplicarRol();
+  pintarTodo(); pintarDocumentos();
+  latido();
+  notificacionesIniciales();
+}
+function aplicarRol(){
+  const esAdmin=usuarioActual?.rol==='admin';
+  document.querySelectorAll('.solo-admin').forEach(b=>b.style.display=esAdmin?'':'none');
+  document.getElementById('seccionAdmin').style.display=esAdmin?'':'none';
+  document.getElementById('usuarioNombre').textContent=usuarioActual?.nombre||'—';
+  document.getElementById('usuarioCorreoRol').textContent=
+    (usuarioActual?.correo||'')+' · '+(esAdmin?'Administrador':'Usuario');
+  if(esAdmin) pintarPanelAdmin();
+  pintarDocumentos();
+}
+function errorPin(msj){
+  const caja=document.getElementById('puntosPin');
+  caja.classList.add('pin-error');
+  setTimeout(()=>caja.classList.remove('pin-error'),400);
+  document.getElementById('pinTitulo').textContent=msj;
+  pinBuffer=''; pintarPuntos();
+}
+function cerrarSesionLocal(){
+  token=''; localStorage.removeItem('tlk_token');
+  usuarioActual=null; db=null;
+  estadoPinInicial();
+  pinBuffer=''; pintarPuntos();
+  document.getElementById('pantallaPin').style.display='flex';
+}
+async function bloquear(){
+  try{await api('salir','POST')}catch(e){}
+  cerrarSesionLocal();
+}
+function cambiarPin(){
+  accesoModo='cambiar'; pinBuffer=''; pintarPuntos();
+  document.getElementById('accesoNombre').style.display='none';
+  document.getElementById('pinTitulo').textContent='Escribe tu NUEVO PIN de 4 dígitos';
+  document.getElementById('pantallaPin').style.display='flex';
+}
+/* ===== Sesiones en vivo (todos los dispositivos, vía servidor) ===== */
+async function latido(){
+  if(!usuarioActual)return;
+  try{await api('latido','POST')}catch(e){}
+}
+setInterval(()=>{latido(); if(usuarioActual?.rol==='admin')pintarVivos();},10000);
+async function pintarVivos(){
+  const cont=document.getElementById('listaVivos'); if(!cont||!usuarioActual)return;
+  try{
+    const vivos=await api('en-linea');
+    cont.innerHTML=vivos.length
+      ?vivos.map(s=>`<div><span style="color:var(--verde)">●</span> <b>${escapar(s.n)}</b> <span class="kpi-sub">${escapar(s.c)}</span></div>`).join('')
+      :'Nadie conectado en este momento.';
+  }catch(e){}
+}
+/* ===== Panel del administrador ===== */
+async function pintarPanelAdmin(){
+  pintarVivos();
+  try{
+    const l=await api('usuarios');
+    document.getElementById('listaUsuarios').innerHTML=l.map(u=>`
+      <div class="adjunto-chip">
+        <div class="logo-icono" style="width:32px;height:32px;font-size:13px;flex:0 0 32px;border-radius:8px;background:${u.rol==='admin'?'var(--azul-3)':'var(--naranja)'}">
+          <i class="fa-solid ${u.rol==='admin'?'fa-user-shield':'fa-user'}"></i></div>
+        <div style="min-width:0"><div class="nombre">${escapar(u.nombre)}</div>
+          <div class="kpi-sub">${escapar(u.correo)} · ${u.rol==='admin'?'Administrador':'Usuario'}</div></div>
+        ${u.id!==usuarioActual.id
+          ?`<button class="btn btn-sm btn-outline-danger border-0 ms-auto" onclick="eliminarUsuario('${u.id}')"><i class="fa-solid fa-trash"></i></button>`
+          :'<span class="kpi-sub ms-auto">(tú)</span>'}
+      </div>`).join('');
+    const acc=await api('accesos');
+    document.getElementById('listaAccesos').innerHTML=acc.slice(0,15).map(a=>
+      `<div class="mb-1">• <b>${escapar(a.n)}</b> — ${new Date(a.f).toLocaleString('es-PA')}</div>`).join('')
+      ||'Sin accesos registrados todavía.';
+  }catch(e){console.error(e);}
+}
+function abrirFormUsuario(){
+  ['usrNombre','usrCorreo','usrPin'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('usrRol').value='usuario';
+  bootstrap.Modal.getOrCreateInstance('#modalUsuario').show();
+}
+async function guardarUsuario(){
+  const nombre=document.getElementById('usrNombre').value.trim();
+  const correo=document.getElementById('usrCorreo').value.trim().toLowerCase();
+  const pin=document.getElementById('usrPin').value.trim();
+  const rol=document.getElementById('usrRol').value;
+  if(!nombre||!correo.includes('@')){aviso('Escribe el nombre y un correo válido','fa-triangle-exclamation');return;}
+  if(!/^\d{4}$/.test(pin)){aviso('El PIN debe tener exactamente 4 dígitos','fa-triangle-exclamation');return;}
+  try{
+    await api('usuarios','POST',{nombre,correo,pin,rol});
+    bootstrap.Modal.getInstance(document.getElementById('modalUsuario')).hide();
+    pintarPanelAdmin();
+    aviso('Usuario <b>'+escapar(nombre)+'</b> creado. Ya puede entrar con su correo y PIN desde cualquier celular.','fa-user-plus');
+  }catch(err){aviso(escapar(err.message),'fa-triangle-exclamation');}
+}
+async function eliminarUsuario(id){
+  if(!confirm('¿Eliminar este usuario? Ya no podrá entrar a la aplicación.'))return;
+  try{
+    await api('usuarios/'+id,'DELETE');
+    pintarPanelAdmin(); aviso('Usuario eliminado','fa-user-minus');
+  }catch(err){aviso(escapar(err.message),'fa-triangle-exclamation');}
+}
+/* ===== Avisos al entrar ===== */
+function notificacionesIniciales(){
+  if(!db)return;
+  const pend=ingresos.filter(i=>i.estado==='Pendiente');
+  if(pend.length){
+    const total=pend.reduce((s,i)=>s+Number(i.monto||0),0);
+    aviso(`Tienes <b>${pend.length}</b> factura(s) pendiente(s) de cobro por <b>${dinero(total)}</b>`,'fa-bell');
+  }
+  const hoy=hoyISO();
+  const limite=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
+  const vencidos=documentos.filter(d=>d.vence&&d.vence<hoy);
+  const proximos=documentos.filter(d=>d.vence&&d.vence>=hoy&&d.vence<=limite);
+  if(vencidos.length) aviso(`<b>${vencidos.length}</b> documento(s) VENCIDO(S). Revísalos en Más → Documentos`,'fa-triangle-exclamation');
+  if(proximos.length) aviso(`<b>${proximos.length}</b> documento(s) vencen en los próximos 30 días`,'fa-bell');
+}
+
+/* ============================================================
+   Parte 3: navegación, FAB y filtros
+============================================================ */
+document.querySelectorAll('.nav-item').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('activo'));
+    b.classList.add('activo');
+    document.querySelectorAll('.pagina').forEach(p=>p.classList.remove('activa'));
+    document.getElementById('pagina-'+b.dataset.pagina).classList.add('activa');
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(b.dataset.pagina==='reportes') pintarReportes();
+    if(b.dataset.pagina==='inicio') pintarInicio();
+  };
+});
+const fabMenu=document.getElementById('fabMenu');
+document.getElementById('botonFab').onclick=()=>{
+  fabMenu.classList.toggle('abierto');
+  document.querySelector('#botonFab i').className=fabMenu.classList.contains('abierto')?'fa-solid fa-xmark':'fa-solid fa-plus';
+};
+function cerrarFab(){fabMenu.classList.remove('abierto');document.querySelector('#botonFab i').className='fa-solid fa-plus';}
+
+function llenarSelect(id,opciones,etiqueta){
+  const s=document.getElementById(id);
+  const previo=s.value;
+  s.innerHTML=`<option value="">${etiqueta}</option>`+opciones.map(o=>`<option>${escapar(o)}</option>`).join('');
+  if([...s.options].some(o=>o.value===previo)) s.value=previo;
+}
+function refrescarFiltros(){
+  const anios=[...new Set([...ingresos,...gastos].map(r=>(r.fecha||'').slice(0,4)).filter(Boolean))].sort().reverse();
+  const clientes=[...new Set(ingresos.map(i=>i.cliente).filter(Boolean))].sort();
+  const camiones=[...new Set([...ingresos,...gastos].map(r=>r.camion).filter(Boolean))].sort();
+  const conductores=[...new Set([...ingresos,...gastos].map(r=>r.conductor).filter(Boolean))].sort();
+  const proveedores=[...new Set(gastos.map(g=>g.proveedor).filter(Boolean))].sort();
+  const tipos=[...new Set(gastos.map(g=>g.tipo).filter(Boolean))].sort();
+  llenarSelect('fIngMes',MESES.map((m,i)=>String(i+1).padStart(2,'0')+' · '+m),'Mes: todos');
+  llenarSelect('fGasMes',MESES.map((m,i)=>String(i+1).padStart(2,'0')+' · '+m),'Mes: todos');
+  llenarSelect('fIngAnio',anios,'Año: todos');
+  llenarSelect('fGasAnio',anios,'Año: todos');
+  llenarSelect('fIngCliente',clientes,'Cliente: todos');
+  llenarSelect('fIngCamion',camiones,'Camión: todos');
+  llenarSelect('fGasCamion',camiones,'Camión: todos');
+  llenarSelect('fGasTipo',tipos,'Tipo: todos');
+  document.getElementById('listaClientes').innerHTML=clientes.map(c=>`<option value="${escapar(c)}">`).join('');
+  document.getElementById('listaCamiones').innerHTML=camiones.map(c=>`<option value="${escapar(c)}">`).join('');
+  document.getElementById('listaConductores').innerHTML=conductores.map(c=>`<option value="${escapar(c)}">`).join('');
+  document.getElementById('listaProveedores').innerHTML=proveedores.map(c=>`<option value="${escapar(c)}">`).join('');
+  // Selectores de año (inicio y reportes)
+  const anioActual=String(new Date().getFullYear());
+  ['anioInicio','anioReporte'].forEach(id=>{
+    const s=document.getElementById(id); const previo=s.value;
+    const lista=anios.length?anios:[anioActual];
+    s.innerHTML=lista.map(a=>`<option>${a}</option>`).join('');
+    s.value=lista.includes(previo)?previo:(lista.includes(anioActual)?anioActual:lista[0]);
+  });
+}
+function limpiarFiltros(cual){
+  if(cual==='ing'){['fIngMes','fIngAnio','fIngCliente','fIngCamion','fIngEstado'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('buscarIngresos').value=''; pintarIngresos();}
+  else{['fGasMes','fGasAnio','fGasTipo','fGasCamion'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('buscarGastos').value=''; pintarGastos();}
+}
+['buscarIngresos','fIngMes','fIngAnio','fIngCliente','fIngCamion','fIngEstado'].forEach(id=>
+  document.getElementById(id).addEventListener('input',pintarIngresos));
+['buscarGastos','fGasMes','fGasAnio','fGasTipo','fGasCamion'].forEach(id=>
+  document.getElementById(id).addEventListener('input',pintarGastos));
+
+/* ============================================================
+   Parte 4: dashboard y gráficas
+============================================================ */
+function crearGrafica(id,config){
+  const lienzo=document.getElementById(id);
+  if(!lienzo) return;
+  if(typeof Chart==='undefined'){
+    lienzo.parentElement.innerHTML=
+      '<div class="vacio" style="padding-top:60px"><i class="fa-solid fa-wifi"></i>'+
+      'No se pudo cargar la librería de gráficas.<br>Verifica tu conexión a internet y recarga la página.</div>';
+    return;
+  }
+  try{
+    if(graficas[id]) graficas[id].destroy();
+    const oscuro=document.documentElement.getAttribute('data-bs-theme')==='dark';
+    Chart.defaults.color=oscuro?'#9FB0C9':'#5B6B84';
+    Chart.defaults.borderColor=oscuro?'rgba(255,255,255,.08)':'rgba(11,37,69,.08)';
+    Chart.defaults.font.family='system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
+    graficas[id]=new Chart(lienzo,config);
+  }catch(err){console.error('Error en gráfica '+id,err);}
+}
+function pintarInicio(){
+  const tIng=ingresos.reduce((s,i)=>s+Number(i.monto||0),0);
+  const tGas=gastos.reduce((s,g)=>s+Number(g.monto||0),0);
+  const util=tIng-tGas;
+  document.getElementById('kpiIngresos').textContent=dinero(tIng);
+  document.getElementById('kpiGastos').textContent=dinero(tGas);
+  document.getElementById('kpiIngresosSub').textContent=ingresos.length+' registro(s)';
+  document.getElementById('kpiGastosSub').textContent=gastos.length+' registro(s)';
+  const kU=document.getElementById('kpiUtilidad');
+  kU.textContent=dinero(util);
+  kU.className='kpi-valor '+(util>=0?'utilidad-positiva':'utilidad-negativa');
+  document.getElementById('kpiMargen').innerHTML=tIng>0
+    ? `Margen: <b class="${util>=0?'utilidad-positiva':'utilidad-negativa'}">${(util/tIng*100).toFixed(1)}%</b>`
+    : 'Margen: —';
+  document.getElementById('kpiViajes').textContent=new Set(ingresos.map(i=>i.viaje||i.id)).size;
+  document.getElementById('kpiFacturas').textContent=
+    ingresos.filter(i=>i.factura).length+gastos.filter(g=>g.factura).length;
+  document.getElementById('kpiPendientes').textContent=ingresos.filter(i=>i.estado==='Pendiente').length;
+
+  const sinDatos=tIng===0&&tGas===0;
+  crearGrafica('graficaIvsG',{type:'doughnut',
+    data:{labels:sinDatos?['Sin datos aún']:['Ingresos','Gastos'],
+      datasets:[{data:sinDatos?[1]:[tIng,tGas],
+      backgroundColor:sinDatos?['#C9D4E4']:['#15803D','#DC2626'],borderWidth:0,hoverOffset:6}]},
+    options:{maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{position:'bottom'},
+        tooltip:{enabled:!sinDatos,callbacks:{label:c=>' '+c.label+': '+dinero(c.raw)}}}}});
+
+  const anio=document.getElementById('anioInicio').value||String(new Date().getFullYear());
+  const ingM=Array(12).fill(0), gasM=Array(12).fill(0);
+  ingresos.forEach(i=>{if((i.fecha||'').slice(0,4)===anio) ingM[Number(i.fecha.slice(5,7))-1]+=Number(i.monto||0)});
+  gastos.forEach(g=>{if((g.fecha||'').slice(0,4)===anio) gasM[Number(g.fecha.slice(5,7))-1]+=Number(g.monto||0)});
+  crearGrafica('graficaMensual',{type:'bar',
+    data:{labels:MESES.map(m=>m.slice(0,3)),datasets:[
+      {label:'Ingresos',data:ingM,backgroundColor:'#1D4E89',borderRadius:5},
+      {label:'Gastos',data:gasM,backgroundColor:'#F77F00',borderRadius:5},
+      {label:'Utilidad',data:ingM.map((v,i)=>v-gasM[i]),type:'line',borderColor:'#15803D',
+        backgroundColor:'#15803D',tension:.35,pointRadius:3}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'},
+      tooltip:{callbacks:{label:c=>' '+c.dataset.label+': '+dinero(c.raw)}}},
+      scales:{y:{ticks:{callback:v=>'B/.'+v.toLocaleString('es-PA')}}}}});
+}
+
+/* ============================================================
+   Parte 5: listas de ingresos y gastos
+============================================================ */
+function filtrar(lista,esIngreso){
+  const pre=esIngreso?'Ing':'Gas';
+  const q=norm(document.getElementById('buscar'+(esIngreso?'Ingresos':'Gastos')).value);
+  const mes=(document.getElementById('f'+pre+'Mes').value||'').slice(0,2);
+  const anio=document.getElementById('f'+pre+'Anio').value;
+  const camion=document.getElementById('f'+pre+'Camion').value;
+  const cliente=esIngreso?document.getElementById('fIngCliente').value:'';
+  const estado=esIngreso?document.getElementById('fIngEstado').value:'';
+  const tipo=!esIngreso?document.getElementById('fGasTipo').value:'';
+  return lista.filter(r=>{
+    if(q){const blob=norm([r.fecha,fechaBonita(r.fecha),r.factura,r.cliente,r.viaje,r.camion,r.conductor,r.ruta,r.proveedor,r.tipo,r.obs].join(' '));
+      if(!blob.includes(q)) return false;}
+    if(mes && (r.fecha||'').slice(5,7)!==mes) return false;
+    if(anio && (r.fecha||'').slice(0,4)!==anio) return false;
+    if(camion && r.camion!==camion) return false;
+    if(cliente && r.cliente!==cliente) return false;
+    if(estado && r.estado!==estado) return false;
+    if(tipo && r.tipo!==tipo) return false;
+    return true;
+  }).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+}
+function pintarIngresos(){
+  const lista=filtrar(ingresos,true);
+  const total=lista.reduce((s,i)=>s+Number(i.monto||0),0);
+  document.getElementById('resumenIngresos').innerHTML=`${lista.length} ingreso(s) · <b>${dinero(total)}</b>`;
+  const cont=document.getElementById('listaIngresos');
+  if(!lista.length){cont.innerHTML=`<div class="vacio"><i class="fa-solid fa-sack-dollar"></i>No hay ingresos que coincidan.<br>Agrega uno con el botón <b>+</b> o importa un Excel.</div>`;return;}
+  cont.innerHTML=lista.map(i=>`
+    <div class="fila-registro" onclick="verDetalle('ingresos','${i.id}')">
+      <div class="d-flex justify-content-between align-items-start">
+        <div style="min-width:0">
+          <div class="fw-bold text-truncate">${escapar(i.cliente||'Sin cliente')}</div>
+          <div class="dato-mini"><i class="fa-regular fa-calendar"></i>${fechaBonita(i.fecha)}</div>
+          ${i.factura?`<div class="dato-mini"><i class="fa-solid fa-hashtag"></i>${escapar(i.factura)}</div>`:''}
+        </div>
+        <div class="text-end">
+          <div class="monto utilidad-positiva">+${dinero(i.monto)}</div>
+          <span class="etiqueta ${i.estado==='Pagado'?'etiqueta-pagado':'etiqueta-pendiente'}">${i.estado||'Pendiente'}</span>
+          ${i.estado==='Pagado'&&i.fechaPago?`<div class="kpi-sub mt-1">Pagó: ${fechaBonita(i.fechaPago)}</div>`:''}
+          ${i.estado!=='Pagado'?`<div class="mt-1"><button class="btn btn-sm py-0 px-2" style="background:var(--verde);color:#fff;border-radius:20px;font-size:11px;font-weight:700"
+            onclick="event.stopPropagation();pedirFechaPago('${i.id}','lista')"><i class="fa-solid fa-check me-1"></i>Pagó</button></div>`:''}
+        </div>
+      </div>
+      <div class="mt-1">
+        ${i.camion?`<span class="dato-mini"><i class="fa-solid fa-truck"></i>${escapar(i.camion)}</span>`:''}
+        ${i.conductor?`<span class="dato-mini"><i class="fa-solid fa-user"></i>${escapar(i.conductor)}</span>`:''}
+        ${i.ruta?`<span class="dato-mini"><i class="fa-solid fa-route"></i>${escapar(i.ruta)}</span>`:''}
+        ${i.adjuntos?`<span class="etiqueta etiqueta-clip"><i class="fa-solid fa-paperclip"></i> ${i.adjuntos}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+function pintarGastos(){
+  const lista=filtrar(gastos,false);
+  const total=lista.reduce((s,g)=>s+Number(g.monto||0),0);
+  document.getElementById('resumenGastos').innerHTML=`${lista.length} gasto(s) · <b>${dinero(total)}</b>`;
+  const cont=document.getElementById('listaGastos');
+  if(!lista.length){cont.innerHTML=`<div class="vacio"><i class="fa-solid fa-money-bill-transfer"></i>No hay gastos que coincidan.<br>Agrega uno con el botón <b>+</b> o importa un Excel.</div>`;return;}
+  cont.innerHTML=lista.map(g=>`
+    <div class="fila-registro" onclick="verDetalle('gastos','${g.id}')">
+      <div class="d-flex justify-content-between align-items-start">
+        <div style="min-width:0">
+          <div class="fw-bold text-truncate">${escapar(g.proveedor||g.tipo||'Gasto')}</div>
+          <div class="dato-mini"><i class="fa-regular fa-calendar"></i>${fechaBonita(g.fecha)}</div>
+          ${g.tipo?`<span class="etiqueta etiqueta-clip">${escapar(g.tipo)}</span>`:''}
+        </div>
+        <div class="text-end"><div class="monto utilidad-negativa">−${dinero(g.monto)}</div></div>
+      </div>
+      <div class="mt-1">
+        ${g.camion?`<span class="dato-mini"><i class="fa-solid fa-truck"></i>${escapar(g.camion)}</span>`:''}
+        ${g.conductor?`<span class="dato-mini"><i class="fa-solid fa-user"></i>${escapar(g.conductor)}</span>`:''}
+        ${g.factura?`<span class="dato-mini"><i class="fa-solid fa-hashtag"></i>${escapar(g.factura)}</span>`:''}
+        ${g.adjuntos?`<span class="etiqueta etiqueta-clip"><i class="fa-solid fa-paperclip"></i> ${g.adjuntos}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+function pintarTodo(){
+  [refrescarFiltros,pintarInicio,pintarIngresos,pintarGastos].forEach(paso=>{
+    try{paso()}catch(err){console.error('Error al pintar:',err)}
+  });
+}
+
+/* ============================================================
+   Parte 6: formularios, guardado e historial
+============================================================ */
+function hoyISO(){const f=new Date();return f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');}
+function anotarHistorial(reg,accion){
+  reg.historial=reg.historial||[];
+  reg.historial.push({f:new Date().toISOString(),a:accion});
+}
+function abrirFormIngreso(reg){
+  adjuntosTemp=[]; document.getElementById('adjuntosIngreso').innerHTML='';
+  document.getElementById('ingId').value=reg?reg.id:'';
+  document.getElementById('tituloFormIngreso').innerHTML=
+    `<i class="fa-solid fa-sack-dollar me-2" style="color:var(--naranja)"></i>${reg?'Editar':'Nuevo'} ingreso`;
+  document.getElementById('ingFecha').value=reg?reg.fecha:hoyISO();
+  document.getElementById('ingFactura').value=reg?.factura||'';
+  document.getElementById('ingCliente').value=reg?.cliente||'';
+  document.getElementById('ingViaje').value=reg?.viaje||'';
+  document.getElementById('ingCamion').value=reg?.camion||'';
+  document.getElementById('ingConductor').value=reg?.conductor||'';
+  document.getElementById('ingRuta').value=reg?.ruta||'';
+  document.getElementById('ingMonto').value=reg?.monto??'';
+  document.getElementById('ingEstado').value=reg?.estado||'Pagado';
+  document.getElementById('ingFechaPago').value=reg?.fechaPago||'';
+  document.getElementById('cajaFechaPago').style.display=(reg?.estado||'Pagado')==='Pagado'?'':'none';
+  document.getElementById('ingObs').value=reg?.obs||'';
+  formularioActivo='ingreso';
+  if(reg) mostrarAdjuntosDe(reg.id,'adjuntosIngreso');
+  bootstrap.Modal.getOrCreateInstance('#modalIngreso').show();
+}
+function abrirFormGasto(reg){
+  adjuntosTemp=[]; document.getElementById('adjuntosGasto').innerHTML='';
+  document.getElementById('gasId').value=reg?reg.id:'';
+  document.getElementById('tituloFormGasto').innerHTML=
+    `<i class="fa-solid fa-money-bill-transfer me-2" style="color:var(--naranja)"></i>${reg?'Editar':'Nuevo'} gasto`;
+  document.getElementById('gasFecha').value=reg?reg.fecha:hoyISO();
+  document.getElementById('gasMonto').value=reg?.monto??'';
+  if(reg?.tipo){
+    const sel=document.getElementById('gasTipo');
+    if(![...sel.options].some(o=>o.value===reg.tipo)) sel.add(new Option(reg.tipo,reg.tipo));
+    sel.value=reg.tipo;
+  }else document.getElementById('gasTipo').value='Combustible';
+  document.getElementById('gasCamion').value=reg?.camion||'';
+  document.getElementById('gasConductor').value=reg?.conductor||'';
+  document.getElementById('gasProveedor').value=reg?.proveedor||'';
+  document.getElementById('gasFactura').value=reg?.factura||'';
+  document.getElementById('gasObs').value=reg?.obs||'';
+  formularioActivo='gasto';
+  if(reg) mostrarAdjuntosDe(reg.id,'adjuntosGasto');
+  bootstrap.Modal.getOrCreateInstance('#modalGasto').show();
+}
+async function guardarIngreso(){
+  const fecha=document.getElementById('ingFecha').value;
+  const cliente=document.getElementById('ingCliente').value.trim();
+  const monto=parseFloat(document.getElementById('ingMonto').value);
+  if(!fecha||!cliente||!(monto>=0)){aviso('Completa fecha, cliente y monto','fa-triangle-exclamation');return;}
+  const id=document.getElementById('ingId').value;
+  const previo=id?ingresos.find(i=>i.id===id):null;
+  const reg=previo?{...previo}:{id:nuevoId(),creado:new Date().toISOString(),historial:[]};
+  const estadoNuevo=document.getElementById('ingEstado').value;
+  const fechaPago=estadoNuevo==='Pagado'?(document.getElementById('ingFechaPago').value||hoyISO()):'';
+  Object.assign(reg,{fecha,cliente,monto,
+    factura:document.getElementById('ingFactura').value.trim(),
+    viaje:document.getElementById('ingViaje').value.trim(),
+    camion:document.getElementById('ingCamion').value.trim(),
+    conductor:document.getElementById('ingConductor').value.trim(),
+    ruta:document.getElementById('ingRuta').value.trim(),
+    estado:estadoNuevo,fechaPago,
+    obs:document.getElementById('ingObs').value.trim()});
+  if(previo&&previo.estado!=='Pagado'&&estadoNuevo==='Pagado')
+    anotarHistorial(reg,'Marcada como pagada el '+fechaBonita(fechaPago));
+  anotarHistorial(reg,previo?'Registro editado':'Registro creado');
+  await guardarAdjuntosPendientes(reg);
+  await dbGuardar('ingresos',reg);
+  if(previo) ingresos[ingresos.findIndex(i=>i.id===id)]=reg; else ingresos.push(reg);
+  bootstrap.Modal.getInstance(document.getElementById('modalIngreso')).hide();
+  pintarTodo(); aviso(previo?'Ingreso actualizado':'Ingreso guardado');
+}
+async function guardarGasto(){
+  const fecha=document.getElementById('gasFecha').value;
+  const monto=parseFloat(document.getElementById('gasMonto').value);
+  const tipo=document.getElementById('gasTipo').value;
+  if(!fecha||!tipo||!(monto>=0)){aviso('Completa fecha, tipo y monto','fa-triangle-exclamation');return;}
+  const id=document.getElementById('gasId').value;
+  const previo=id?gastos.find(g=>g.id===id):null;
+  const reg=previo?{...previo}:{id:nuevoId(),creado:new Date().toISOString(),historial:[]};
+  Object.assign(reg,{fecha,tipo,monto,
+    camion:document.getElementById('gasCamion').value.trim(),
+    conductor:document.getElementById('gasConductor').value.trim(),
+    proveedor:document.getElementById('gasProveedor').value.trim(),
+    factura:document.getElementById('gasFactura').value.trim(),
+    obs:document.getElementById('gasObs').value.trim()});
+  anotarHistorial(reg,previo?'Registro editado':'Registro creado');
+  await guardarAdjuntosPendientes(reg);
+  await dbGuardar('gastos',reg);
+  if(previo) gastos[gastos.findIndex(g=>g.id===id)]=reg; else gastos.push(reg);
+  bootstrap.Modal.getInstance(document.getElementById('modalGasto')).hide();
+  pintarTodo(); aviso(previo?'Gasto actualizado':'Gasto guardado');
+}
+
+/* ============================================================
+   Parte 7: adjuntos (cámara, galería, PDF)
+============================================================ */
+let formularioActivo='ingreso';
+function capturar(modo){
+  const id={camara:'entradaCamara',galeria:'entradaGaleria',pdf:'entradaPdf'}[modo];
+  document.getElementById(id).value='';
+  document.getElementById(id).click();
+}
+['entradaCamara','entradaGaleria','entradaPdf'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',async e=>{
+    const archivo=e.target.files[0]; if(!archivo)return;
+    if(archivo.size>8*1024*1024){aviso('El archivo supera 8 MB; usa uno más liviano','fa-triangle-exclamation');return;}
+    const data=await new Promise((res,rej)=>{
+      const l=new FileReader(); l.onload=()=>res(l.result); l.onerror=rej; l.readAsDataURL(archivo);});
+    adjuntosTemp.push({id:nuevoId(),nombre:archivo.name||('factura-'+Date.now()+(archivo.type.includes('pdf')?'.pdf':'.jpg')),
+      tipo:archivo.type,data,fecha:new Date().toISOString()});
+    pintarAdjuntosTemp();
+    aviso('Factura lista para guardar con el registro','fa-paperclip');
+  });
+});
+function pintarAdjuntosTemp(){
+  const cont=document.getElementById(
+    formularioActivo==='documento'?'adjuntosDocumento'
+    :formularioActivo==='ingreso'?'adjuntosIngreso':'adjuntosGasto');
+  const existentes=cont.querySelectorAll('.adjunto-existente');
+  cont.innerHTML=''; existentes.forEach(x=>cont.appendChild(x));
+  adjuntosTemp.forEach((a,idx)=>{
+    const d=document.createElement('div'); d.className='adjunto-chip';
+    d.innerHTML=`${a.tipo.includes('pdf')?'<div class="icono-pdf"><i class="fa-solid fa-file-pdf"></i></div>':`<img class="miniatura" src="${a.data}">`}
+      <div class="nombre">${escapar(a.nombre)}</div>
+      <button class="btn btn-sm btn-outline-danger border-0" onclick="adjuntosTemp.splice(${idx},1);pintarAdjuntosTemp()"><i class="fa-solid fa-xmark"></i></button>`;
+    cont.appendChild(d);
+  });
+}
+async function guardarAdjuntosPendientes(reg){
+  for(const a of adjuntosTemp){
+    await dbGuardar('archivos',{...a,refId:reg.id});
+    anotarHistorial(reg,'Factura adjuntada: '+a.nombre);
+  }
+  if(adjuntosTemp.length||reg.adjuntos===undefined){
+    reg.adjuntos=(await metaArchivos(reg.id)).length;
+  }
+  adjuntosTemp=[];
+}
+async function mostrarAdjuntosDe(refId,contenedorId){
+  const todos=await metaArchivos(refId);
+  const cont=document.getElementById(contenedorId);
+  todos.forEach(a=>{
+    const d=document.createElement('div'); d.className='adjunto-chip adjunto-existente';
+    d.innerHTML=`${a.tipo.includes('pdf')?'<div class="icono-pdf"><i class="fa-solid fa-file-pdf"></i></div>':'<div class="icono-pdf" style="background:rgba(29,78,137,.12);color:var(--azul-3)"><i class="fa-solid fa-image"></i></div>'}
+      <div class="nombre">${escapar(a.nombre)}</div>
+      <button class="btn btn-sm btn-suave border-0" onclick="verArchivo('${a.id}')"><i class="fa-solid fa-eye"></i></button>`;
+    cont.appendChild(d);
+  });
+}
+async function verArchivo(id){
+  const a=await dbObtener('archivos',id); if(!a)return;
+  document.getElementById('tituloVisor').textContent=a.nombre;
+  document.getElementById('cuerpoVisor').innerHTML=a.tipo.includes('pdf')
+    ?`<iframe src="${a.data}" style="width:100%;height:70vh;border:none;border-radius:10px"></iframe>
+      <div class="kpi-sub mt-2">Si el PDF no se muestra en tu navegador, usa el botón Descargar.</div>`
+    :`<img src="${a.data}" style="max-width:100%;border-radius:12px">`;
+  document.getElementById('btnDescargarVisor').onclick=()=>descargarDataURL(a.data,a.nombre);
+  bootstrap.Modal.getOrCreateInstance('#modalVisor').show();
+}
+function descargarDataURL(data,nombre){
+  const en=document.createElement('a'); en.href=data; en.download=nombre;
+  document.body.appendChild(en); en.click(); en.remove();
+}
+
+/* ============================================================
+   Parte 8: detalle e historial
+============================================================ */
+async function verDetalle(tienda,id){
+  const reg=(tienda==='ingresos'?ingresos:gastos).find(r=>r.id===id); if(!reg)return;
+  detalleActual={tienda,id};
+  const esIng=tienda==='ingresos';
+  document.getElementById('tituloDetalle').innerHTML=
+    `<i class="fa-solid ${esIng?'fa-sack-dollar':'fa-money-bill-transfer'} me-2" style="color:var(--naranja)"></i>Detalle de ${esIng?'ingreso':'gasto'}`;
+  const campos=esIng
+    ?[['Fecha',fechaBonita(reg.fecha)],['N° de factura',reg.factura],['Cliente',reg.cliente],['Viaje',reg.viaje],
+      ['Camión',reg.camion],['Conductor',reg.conductor],['Ruta',reg.ruta],['Monto',dinero(reg.monto)],
+      ['Estado',reg.estado],['Fecha de pago',reg.fechaPago?fechaBonita(reg.fechaPago):''],['Observaciones',reg.obs]]
+    :[['Fecha',fechaBonita(reg.fecha)],['Tipo de gasto',reg.tipo],['Camión',reg.camion],['Conductor',reg.conductor],
+      ['Proveedor',reg.proveedor],['N° de factura',reg.factura],['Monto',dinero(reg.monto)],['Observaciones',reg.obs]];
+  const adjuntos=await metaArchivos(id);
+  document.getElementById('cuerpoDetalle').innerHTML=`
+    <div class="text-center mb-3">
+      <div class="kpi-titulo">Monto</div>
+      <div class="kpi-valor ${esIng?'utilidad-positiva':'utilidad-negativa'}" style="font-size:26px">
+        ${esIng?'+':'−'}${dinero(reg.monto)}</div>
+      ${esIng?`<span class="etiqueta ${reg.estado==='Pagado'?'etiqueta-pagado':'etiqueta-pendiente'}">${reg.estado||'Pendiente'}${reg.estado==='Pagado'&&reg.fechaPago?' · '+fechaBonita(reg.fechaPago):''}</span>`:''}
+      ${esIng&&reg.estado!=='Pagado'?`<div class="mt-2"><button class="btn btn-sm" style="background:var(--verde);color:#fff;border-radius:20px;font-weight:700"
+        onclick="pedirFechaPago('${reg.id}','detalle')"><i class="fa-solid fa-circle-check me-1"></i>Registrar pago</button></div>`:''}
+    </div>
+    <table class="table table-sm tabla-reporte">${campos.filter(c=>c[1]).map(c=>
+      `<tr><th style="width:42%">${c[0]}</th><td>${escapar(c[1])}</td></tr>`).join('')}</table>
+    <div class="fw-bold mt-3 mb-1" style="font-size:13px"><i class="fa-solid fa-paperclip me-1" style="color:var(--naranja)"></i>Facturas adjuntas (${adjuntos.length})</div>
+    ${adjuntos.length?adjuntos.map(a=>`
+      <div class="adjunto-chip">
+        ${a.tipo.includes('pdf')?'<div class="icono-pdf"><i class="fa-solid fa-file-pdf"></i></div>':'<div class="icono-pdf" style="background:rgba(29,78,137,.12);color:var(--azul-3)"><i class="fa-solid fa-image"></i></div>'}
+        <div><div class="nombre">${escapar(a.nombre)}</div><div class="kpi-sub">${new Date(a.fecha).toLocaleString('es-PA')}</div></div>
+        <div class="ms-auto d-flex gap-1">
+          <button class="btn btn-sm btn-suave border-0" onclick="verArchivo('${a.id}')" title="Ver"><i class="fa-solid fa-eye"></i></button>
+          <button class="btn btn-sm btn-suave border-0" onclick="descargarAdjunto('${a.id}')" title="Descargar"><i class="fa-solid fa-download"></i></button>
+        </div></div>`).join('')
+      :'<div class="kpi-sub">Sin facturas adjuntas. Edita el registro para agregar una.</div>'}
+    <div class="fw-bold mt-3 mb-2" style="font-size:13px"><i class="fa-solid fa-clock-rotate-left me-1" style="color:var(--naranja)"></i>Historial</div>
+    ${(reg.historial||[]).slice().reverse().map(h=>`
+      <div class="linea-historial"><div>${escapar(h.a)}</div>
+      <div class="cuando">${new Date(h.f).toLocaleString('es-PA')}</div></div>`).join('')||'<div class="kpi-sub">Sin movimientos.</div>'}`;
+  bootstrap.Modal.getOrCreateInstance('#modalDetalle').show();
+}
+async function descargarAdjunto(id){const a=await dbObtener('archivos',id); if(a) descargarDataURL(a.data,a.nombre);}
+function editarActual(){
+  if(!detalleActual)return;
+  bootstrap.Modal.getInstance(document.getElementById('modalDetalle')).hide();
+  const reg=(detalleActual.tienda==='ingresos'?ingresos:gastos).find(r=>r.id===detalleActual.id);
+  setTimeout(()=>detalleActual.tienda==='ingresos'?abrirFormIngreso(reg):abrirFormGasto(reg),260);
+}
+async function eliminarActual(){
+  if(!detalleActual)return;
+  if(!confirm('¿Eliminar este registro y sus facturas adjuntas? Esta acción no se puede deshacer.'))return;
+  const {tienda,id}=detalleActual;
+  await dbBorrar(tienda,id);
+  const adjuntos=await metaArchivos(id);
+  for(const a of adjuntos) await dbBorrar('archivos',a.id);
+  if(tienda==='ingresos') ingresos=ingresos.filter(r=>r.id!==id); else gastos=gastos.filter(r=>r.id!==id);
+  bootstrap.Modal.getInstance(document.getElementById('modalDetalle')).hide();
+  pintarTodo(); aviso('Registro eliminado','fa-trash');
+}
+
+/* ============================================================
+   Parte 9: importación de Excel (SheetJS)
+============================================================ */
+function fechaDesdeCelda(v){
+  if(v==null||v==='') return '';
+  if(v instanceof Date && !isNaN(v))
+    return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0')+'-'+String(v.getDate()).padStart(2,'0');
+  if(typeof v==='number'){ // número de serie de Excel
+    const f=XLSX.SSF.parse_date_code(v);
+    if(f) return f.y+'-'+String(f.m).padStart(2,'0')+'-'+String(f.d).padStart(2,'0');
+  }
+  const t=String(v).trim();
+  let m=t.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/); // dd/mm/aaaa
+  if(m){let a=m[3].length===2?'20'+m[3]:m[3];
+    return a+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');}
+  m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); // aaaa-mm-dd
+  if(m) return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  return '';
+}
+function numeroDesdeCelda(v){
+  if(v==null||v==='')return 0;
+  if(typeof v==='number')return v;
+  return parseFloat(String(v).replace(/[^0-9.,-]/g,'').replace(/,(?=\d{3})/g,'').replace(',','.'))||0;
+}
+function leerLibro(archivo){
+  return new Promise((res,rej)=>{
+    const l=new FileReader();
+    l.onload=e=>{try{res(XLSX.read(e.target.result,{type:'array',cellDates:true}))}catch(err){rej(err)}};
+    l.onerror=rej; l.readAsArrayBuffer(archivo);
+  });
+}
+// Busca la fila de encabezados dentro de las primeras 15 filas
+function detectarEncabezado(filas,claves){
+  for(let i=0;i<Math.min(filas.length,15);i++){
+    const fila=(filas[i]||[]).map(norm);
+    const aciertos=claves.filter(k=>fila.some(c=>c.includes(k))).length;
+    if(aciertos>=2) return i;
+  }
+  return -1;
+}
+function indiceColumna(encabezado,posibles){
+  for(const p of posibles){
+    const i=encabezado.findIndex(c=>c.includes(p));
+    if(i>=0) return i;
+  }
+  return -1;
+}
+document.getElementById('archivoIngresos').addEventListener('change',async e=>{
+  const archivo=e.target.files[0]; if(!archivo)return; e.target.value='';
+  try{
+    const libro=await leerLibro(archivo);
+    const filas=XLSX.utils.sheet_to_json(libro.Sheets[libro.SheetNames[0]],{header:1,defval:''});
+    const iEnc=detectarEncabezado(filas,['fecha','cliente','monto','factura','viaje','camion','ruta']);
+    if(iEnc<0){aviso('No se reconocieron las columnas del Excel de ingresos','fa-triangle-exclamation');return;}
+    const enc=filas[iEnc].map(norm);
+    const col={
+      fecha:indiceColumna(enc,['fecha']),
+      factura:indiceColumna(enc,['factura','n° factura','numero','no. factura','cufe']),
+      cliente:indiceColumna(enc,['cliente','nombre']),
+      viaje:indiceColumna(enc,['viaje']),
+      camion:indiceColumna(enc,['camion','placa','unidad']),
+      conductor:indiceColumna(enc,['conductor','chofer']),
+      ruta:indiceColumna(enc,['ruta','destino']),
+      monto:indiceColumna(enc,['monto','total','importe','valor']),
+      estado:indiceColumna(enc,['estado','pago']),
+      obs:indiceColumna(enc,['observa','nota','comentario'])};
+    let nuevos=0;
+    for(let i=iEnc+1;i<filas.length;i++){
+      const f=filas[i]; if(!f||!f.length)continue;
+      const monto=col.monto>=0?numeroDesdeCelda(f[col.monto]):0;
+      const fecha=col.fecha>=0?fechaDesdeCelda(f[col.fecha]):'';
+      const cliente=col.cliente>=0?String(f[col.cliente]||'').trim():'';
+      if(!fecha && !cliente && !monto) continue;
+      const estadoCrudo=col.estado>=0?norm(f[col.estado]):'';
+      const reg={id:nuevoId(),creado:new Date().toISOString(),historial:[],adjuntos:0,
+        fecha:fecha||hoyISO(),cliente:cliente||'Sin cliente',
+        factura:col.factura>=0?String(f[col.factura]||'').trim():'',
+        viaje:col.viaje>=0?String(f[col.viaje]||'').trim():'',
+        camion:col.camion>=0?String(f[col.camion]||'').trim():'',
+        conductor:col.conductor>=0?String(f[col.conductor]||'').trim():'',
+        ruta:col.ruta>=0?String(f[col.ruta]||'').trim():'',
+        monto,estado:estadoCrudo.includes('paga')?'Pagado':(estadoCrudo.includes('pend')?'Pendiente':'Pendiente'),
+        obs:col.obs>=0?String(f[col.obs]||'').trim():''};
+      anotarHistorial(reg,'Importado desde Excel: '+archivo.name);
+      await dbGuardar('ingresos',reg); ingresos.push(reg); nuevos++;
+    }
+    pintarTodo();
+    aviso(nuevos?`Se importaron <b>${nuevos}</b> ingreso(s) desde ${escapar(archivo.name)}`:'El archivo no contenía filas válidas','fa-file-excel');
+  }catch(err){console.error(err);aviso('No se pudo leer el archivo Excel','fa-triangle-exclamation');}
+});
+document.getElementById('archivoGastos').addEventListener('change',async e=>{
+  const archivo=e.target.files[0]; if(!archivo)return; e.target.value='';
+  try{
+    const libro=await leerLibro(archivo);
+    const filas=XLSX.utils.sheet_to_json(libro.Sheets[libro.SheetNames[0]],{header:1,defval:''});
+    const iEnc=detectarEncabezado(filas,['fecha','monto','proveedor','tipo','emisor','cufe','factura','camion']);
+    if(iEnc<0){aviso('No se reconocieron las columnas del Excel de gastos','fa-triangle-exclamation');return;}
+    const enc=filas[iEnc].map(norm);
+    const esDGI=enc.some(c=>c.includes('cufe'))&&enc.some(c=>c.includes('emisor'));
+    const col={
+      fecha:indiceColumna(enc,['fecha de emision','fecha']),
+      tipo:esDGI?-1:indiceColumna(enc,['tipo de gasto','tipo','categoria','concepto']),
+      camion:indiceColumna(enc,['camion','placa','unidad']),
+      conductor:indiceColumna(enc,['conductor','chofer']),
+      proveedor:indiceColumna(enc,['proveedor','nombre del emisor','emisor']),
+      factura:esDGI?indiceColumna(enc,['cufe']):indiceColumna(enc,['factura','numero','no.']),
+      monto:indiceColumna(enc,['monto','total','importe','valor']),
+      itbms:indiceColumna(enc,['itbms']),
+      obs:indiceColumna(enc,['observa','nota','naturaleza'])};
+    let nuevos=0;
+    for(let i=iEnc+1;i<filas.length;i++){
+      const f=filas[i]; if(!f||!f.length)continue;
+      const monto=col.monto>=0?numeroDesdeCelda(f[col.monto]):0;
+      const fecha=col.fecha>=0?fechaDesdeCelda(f[col.fecha]):'';
+      const proveedor=col.proveedor>=0?String(f[col.proveedor]||'').replace(/\s+/g,' ').trim():'';
+      if(!fecha && !proveedor && !monto) continue;
+      let facturaTxt=col.factura>=0?String(f[col.factura]||'').trim():'';
+      if(esDGI && facturaTxt.length>20) facturaTxt='CUFE …'+facturaTxt.slice(-12);
+      const itbms=col.itbms>=0?numeroDesdeCelda(f[col.itbms]):0;
+      const reg={id:nuevoId(),creado:new Date().toISOString(),historial:[],adjuntos:0,
+        fecha:fecha||hoyISO(),
+        tipo:col.tipo>=0&&f[col.tipo]?String(f[col.tipo]).trim():(esDGI?'Factura electrónica':'Otro'),
+        camion:col.camion>=0?String(f[col.camion]||'').trim():'',
+        conductor:col.conductor>=0?String(f[col.conductor]||'').trim():'',
+        proveedor:proveedor,factura:facturaTxt,monto,
+        obs:[col.obs>=0?String(f[col.obs]||'').trim():'',itbms?('ITBMS: '+dinero(itbms)):''].filter(Boolean).join(' · ')};
+      anotarHistorial(reg,'Importado desde Excel: '+archivo.name);
+      await dbGuardar('gastos',reg); gastos.push(reg); nuevos++;
+    }
+    pintarTodo();
+    aviso(nuevos?`Se importaron <b>${nuevos}</b> gasto(s) desde ${escapar(archivo.name)}${esDGI?' (formato DGI detectado)':''}`:'El archivo no contenía filas válidas','fa-file-excel');
+  }catch(err){console.error(err);aviso('No se pudo leer el archivo Excel','fa-triangle-exclamation');}
+});
+
+/* ============================================================
+   Parte 10: reportes
+============================================================ */
+function agrupar(lista,campo){
+  const m={};
+  lista.forEach(r=>{const k=(r[campo]||'Sin '+campo).toString().trim()||'Sin '+campo;
+    m[k]=(m[k]||0)+Number(r.monto||0);});
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+function pintarReportes(){
+  const anio=document.getElementById('anioReporte').value;
+  const ing=ingresos.filter(i=>!anio||(i.fecha||'').slice(0,4)===anio);
+  const gas=gastos.filter(g=>!anio||(g.fecha||'').slice(0,4)===anio);
+  const tIng=ing.reduce((s,i)=>s+Number(i.monto||0),0);
+  const tGas=gas.reduce((s,g)=>s+Number(g.monto||0),0);
+  const util=tIng-tGas;
+
+  // Estado de resultados
+  const porTipo=agrupar(gas,'tipo');
+  document.getElementById('tablaEstado').innerHTML=`
+    <tr><th>Ingresos por servicios de transporte</th><td class="text-end fw-bold utilidad-positiva">${dinero(tIng)}</td></tr>
+    <tr><th colspan="2" style="padding-top:10px">Gastos operativos:</th></tr>
+    ${porTipo.map(([t,v])=>`<tr><td class="ps-3">· ${escapar(t)}</td><td class="text-end">${dinero(v)}</td></tr>`).join('')||
+      '<tr><td class="ps-3 kpi-sub">Sin gastos registrados</td><td></td></tr>'}
+    <tr><th>Total de gastos</th><td class="text-end fw-bold utilidad-negativa">${dinero(tGas)}</td></tr>
+    <tr style="border-top:2px solid var(--naranja)"><th style="font-size:14px">UTILIDAD ${anio?('· '+anio):''}</th>
+      <td class="text-end fw-bold ${util>=0?'utilidad-positiva':'utilidad-negativa'}" style="font-size:15px">${dinero(util)}</td></tr>
+    <tr><th class="kpi-sub">Margen sobre ingresos</th><td class="text-end kpi-sub">${tIng>0?(util/tIng*100).toFixed(1)+'%':'—'}</td></tr>`;
+
+  // Utilidad mensual (líneas)
+  const ingM=Array(12).fill(0), gasM=Array(12).fill(0);
+  ing.forEach(i=>ingM[Number((i.fecha||'').slice(5,7))-1]+=Number(i.monto||0));
+  gas.forEach(g=>gasM[Number((g.fecha||'').slice(5,7))-1]+=Number(g.monto||0));
+  crearGrafica('grUtilidadMensual',{type:'line',
+    data:{labels:MESES.map(m=>m.slice(0,3)),datasets:[
+      {label:'Utilidad',data:ingM.map((v,i)=>v-gasM[i]),borderColor:'#F77F00',backgroundColor:'rgba(247,127,0,.18)',
+        fill:true,tension:.35,pointRadius:3}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>' Utilidad: '+dinero(c.raw)}}},
+      scales:{y:{ticks:{callback:v=>'B/.'+v.toLocaleString('es-PA')}}}}});
+
+  // Gastos por camión (barras)
+  const gCam=agrupar(gas.filter(g=>g.camion),'camion').slice(0,10);
+  crearGrafica('grGastosCamion',{type:'bar',
+    data:{labels:gCam.map(x=>x[0]),datasets:[{label:'Gastos',data:gCam.map(x=>x[1]),
+      backgroundColor:'#1D4E89',borderRadius:6}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>' '+dinero(c.raw)}}},
+      scales:{y:{ticks:{callback:v=>'B/.'+v.toLocaleString('es-PA')}}}}});
+
+  // Gastos por conductor (tabla)
+  const gCon=agrupar(gas.filter(g=>g.conductor),'conductor');
+  document.getElementById('tablaConductor').innerHTML=gCon.length
+    ?'<tr><th>Conductor</th><th class="text-end">Gastos</th></tr>'+
+      gCon.map(([c,v])=>`<tr><td>${escapar(c)}</td><td class="text-end fw-bold">${dinero(v)}</td></tr>`).join('')
+    :'<tr><td class="kpi-sub">Sin gastos con conductor asignado.</td></tr>';
+
+  // Gastos por tipo (pastel)
+  const colores=['#F77F00','#1D4E89','#15803D','#DC2626','#7C3AED','#0891B2','#CA8A04','#DB2777','#4B5563','#059669','#9333EA','#F43F5E'];
+  crearGrafica('grGastosTipo',{type:'pie',
+    data:{labels:porTipo.map(x=>x[0]),datasets:[{data:porTipo.map(x=>x[1]),
+      backgroundColor:porTipo.map((_,i)=>colores[i%colores.length]),borderWidth:0}]},
+    options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom'},
+      tooltip:{callbacks:{label:c=>' '+c.label+': '+dinero(c.raw)}}}}});
+
+  // Ingresos por cliente (barras horizontales)
+  const iCli=agrupar(ing.filter(i=>i.cliente),'cliente').slice(0,10);
+  crearGrafica('grIngresosCliente',{type:'bar',
+    data:{labels:iCli.map(x=>x[0]),datasets:[{label:'Ingresos',data:iCli.map(x=>x[1]),
+      backgroundColor:'#15803D',borderRadius:6}]},
+    options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:c=>' '+dinero(c.raw)}}},
+      scales:{x:{ticks:{callback:v=>'B/.'+v.toLocaleString('es-PA')}}}}});
+
+  // Ranking de clientes
+  const maxCli=iCli[0]?.[1]||1;
+  document.getElementById('rankClientes').innerHTML=iCli.length?iCli.map(([c,v],i)=>`
+    <div class="d-flex align-items-center gap-2 ${i?'mt-3':''}">
+      <span class="fw-bold" style="width:24px;color:var(--naranja)">${i+1}º</span>
+      <div class="flex-fill" style="min-width:0">
+        <div class="d-flex justify-content-between"><span class="fw-bold text-truncate" style="font-size:13px">${escapar(c)}</span>
+        <span class="fw-bold" style="font-size:13px">${dinero(v)}</span></div>
+        <div class="barra-rank mt-1" style="width:${Math.max(6,v/maxCli*100)}%"></div>
+      </div></div>`).join('')
+    :'<div class="vacio"><i class="fa-solid fa-ranking-star"></i>Aún no hay ingresos por cliente.</div>';
+
+  // Ranking de camiones por utilidad (ingresos − gastos por camión)
+  const mapaCam={};
+  ing.forEach(i=>{if(i.camion){mapaCam[i.camion]=mapaCam[i.camion]||{ing:0,gas:0};mapaCam[i.camion].ing+=Number(i.monto||0);}});
+  gas.forEach(g=>{if(g.camion){mapaCam[g.camion]=mapaCam[g.camion]||{ing:0,gas:0};mapaCam[g.camion].gas+=Number(g.monto||0);}});
+  const rankCam=Object.entries(mapaCam).map(([c,v])=>[c,v.ing-v.gas,v.ing,v.gas]).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('rankCamiones').innerHTML=rankCam.length?
+    `<table class="table table-sm tabla-reporte mb-0">
+      <tr><th>#</th><th>Camión</th><th class="text-end">Ingresos</th><th class="text-end">Gastos</th><th class="text-end">Utilidad</th></tr>
+      ${rankCam.map(([c,u,i2,g2],idx)=>`<tr><td class="fw-bold" style="color:var(--naranja)">${idx+1}º</td>
+        <td class="fw-bold">${escapar(c)}</td><td class="text-end">${dinero(i2)}</td><td class="text-end">${dinero(g2)}</td>
+        <td class="text-end fw-bold ${u>=0?'utilidad-positiva':'utilidad-negativa'}">${dinero(u)}</td></tr>`).join('')}
+    </table>`
+    :'<div class="vacio"><i class="fa-solid fa-truck"></i>Registra el camión en tus ingresos y gastos para ver este ranking.</div>';
+
+  // Cuentas por cobrar (saldo total, sin filtro de año)
+  pintarCxC();
+}
+/* ===== Cuentas por cobrar ===== */
+function pintarCxC(){
+  const cont=document.getElementById('cuentasCobrar'); if(!cont)return;
+  const pend=ingresos.filter(i=>i.estado!=='Pagado');
+  if(!pend.length){
+    cont.innerHTML='<div class="vacio"><i class="fa-solid fa-circle-check"></i>¡Excelente! No tienes facturas pendientes de cobro.</div>';
+    return;
+  }
+  const porCliente={};
+  pend.forEach(i=>{const c=i.cliente||'Sin cliente';
+    porCliente[c]=porCliente[c]||{n:0,total:0};
+    porCliente[c].n++; porCliente[c].total+=Number(i.monto||0);});
+  const lista=Object.entries(porCliente).sort((a,b)=>b[1].total-a[1].total);
+  const granTotal=lista.reduce((s,[,v])=>s+v.total,0);
+  cont.innerHTML=`
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="kpi-sub">${pend.length} factura(s) por cobrar · Toca un cliente para ver el detalle</span>
+      <span class="fw-bold" style="color:var(--naranja)">${dinero(granTotal)}</span>
+    </div>
+    ${lista.map(([c,v])=>`
+      <div class="fila-registro mb-2" style="box-shadow:none" onclick="abrirCliente('${c.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
+        <div class="d-flex justify-content-between align-items-center">
+          <div style="min-width:0">
+            <div class="fw-bold text-truncate"><i class="fa-solid fa-user-tie me-1" style="color:var(--naranja)"></i>${escapar(c)}</div>
+            <div class="kpi-sub">${v.n} factura(s) pendiente(s)</div>
+          </div>
+          <div class="text-end">
+            <div class="monto" style="color:var(--naranja)">${dinero(v.total)}</div>
+            <i class="fa-solid fa-chevron-right kpi-sub"></i>
+          </div></div></div>`).join('')}`;
+}
+let clienteAbierto=null;
+function abrirCliente(nombre){
+  clienteAbierto=nombre;
+  pintarCliente();
+  bootstrap.Modal.getOrCreateInstance('#modalCliente').show();
+}
+function pintarCliente(){
+  const nombre=clienteAbierto; if(!nombre)return;
+  const facturas=ingresos.filter(i=>(i.cliente||'Sin cliente')===nombre)
+    .sort((a,b)=>(a.estado==='Pagado')-(b.estado==='Pagado')||(b.fecha||'').localeCompare(a.fecha||''));
+  const tTotal=facturas.reduce((s,i)=>s+Number(i.monto||0),0);
+  const tPend=facturas.filter(i=>i.estado!=='Pagado').reduce((s,i)=>s+Number(i.monto||0),0);
+  document.getElementById('tituloCliente').innerHTML=
+    `<i class="fa-solid fa-user-tie me-2" style="color:var(--naranja)"></i>${escapar(nombre)}`;
+  document.getElementById('cuerpoCliente').innerHTML=`
+    <div class="row g-2 mb-3 text-center">
+      <div class="col-4"><div class="tarjeta py-2" style="box-shadow:none">
+        <div class="kpi-titulo">Facturado</div><div class="fw-bold" style="font-size:13px">${dinero(tTotal)}</div></div></div>
+      <div class="col-4"><div class="tarjeta py-2" style="box-shadow:none">
+        <div class="kpi-titulo">Cobrado</div><div class="fw-bold utilidad-positiva" style="font-size:13px">${dinero(tTotal-tPend)}</div></div></div>
+      <div class="col-4"><div class="tarjeta py-2" style="box-shadow:none">
+        <div class="kpi-titulo">Por cobrar</div><div class="fw-bold" style="font-size:13px;color:var(--naranja)">${dinero(tPend)}</div></div></div>
+    </div>
+    ${facturas.map(i=>`
+      <div class="fila-registro" style="box-shadow:none" onclick="bootstrap.Modal.getInstance(document.getElementById('modalCliente')).hide();setTimeout(()=>verDetalle('ingresos','${i.id}'),260)">
+        <div class="d-flex justify-content-between align-items-start">
+          <div style="min-width:0">
+            <div class="fw-bold" style="font-size:13px">${i.factura?('Factura '+escapar(i.factura)):'Sin n° de factura'}</div>
+            <div class="dato-mini"><i class="fa-regular fa-calendar"></i>${fechaBonita(i.fecha)}</div>
+            ${i.ruta?`<div class="dato-mini"><i class="fa-solid fa-route"></i>${escapar(i.ruta)}</div>`:''}
+            ${i.camion?`<div class="dato-mini"><i class="fa-solid fa-truck"></i>${escapar(i.camion)}</div>`:''}
+          </div>
+          <div class="text-end">
+            <div class="monto" style="font-size:14px">${dinero(i.monto)}</div>
+            <span class="etiqueta ${i.estado==='Pagado'?'etiqueta-pagado':'etiqueta-pendiente'}">${i.estado||'Pendiente'}</span>
+            ${i.estado==='Pagado'&&i.fechaPago?`<div class="kpi-sub mt-1">Pagó: ${fechaBonita(i.fechaPago)}</div>`:''}
+            ${i.estado!=='Pagado'?`<div class="mt-1"><button class="btn btn-sm py-0 px-2" style="background:var(--verde);color:#fff;border-radius:20px;font-size:11px;font-weight:700"
+              onclick="event.stopPropagation();pedirFechaPago('${i.id}','cliente')"><i class="fa-solid fa-check me-1"></i>Pagó</button></div>`:''}
+          </div></div></div>`).join('')}`;
+}
+/* ===== Registrar pago ===== */
+let pagoPendiente=null;
+function pedirFechaPago(id,origen){
+  const reg=ingresos.find(i=>i.id===id); if(!reg)return;
+  pagoPendiente={id,origen};
+  document.getElementById('pagoFecha').value=hoyISO();
+  document.getElementById('resumenPago').innerHTML=`
+    <div class="fw-bold">${escapar(reg.cliente||'Sin cliente')}</div>
+    <div class="kpi-sub">${reg.factura?('Factura '+escapar(reg.factura)+' · '):''}${fechaBonita(reg.fecha)} · <b>${dinero(reg.monto)}</b></div>`;
+  bootstrap.Modal.getOrCreateInstance('#modalPago').show();
+}
+async function confirmarPago(){
+  if(!pagoPendiente)return;
+  const reg=ingresos.find(i=>i.id===pagoPendiente.id); if(!reg)return;
+  const fechaPago=document.getElementById('pagoFecha').value||hoyISO();
+  reg.estado='Pagado'; reg.fechaPago=fechaPago;
+  anotarHistorial(reg,'Marcada como pagada el '+fechaBonita(fechaPago));
+  await dbGuardar('ingresos',reg);
+  bootstrap.Modal.getInstance(document.getElementById('modalPago')).hide();
+  pintarTodo(); pintarCxC();
+  if(pagoPendiente.origen==='cliente') pintarCliente();
+  if(pagoPendiente.origen==='detalle') verDetalle('ingresos',reg.id);
+  aviso(`Factura de <b>${escapar(reg.cliente)}</b> marcada como pagada (${fechaBonita(fechaPago)})`,'fa-circle-check');
+  pagoPendiente=null;
+}
+
+/* ============================================================
+   Parte 10b: documentos importantes
+============================================================ */
+const ICONO_DOC={'Aviso de operación':'fa-store','Declaración de renta':'fa-file-invoice-dollar',
+  'Declaración ITBMS':'fa-percent','Paz y salvo':'fa-stamp','Póliza de seguro':'fa-shield-halved',
+  'Contrato':'fa-file-signature','Permiso / placa':'fa-id-card','Registro vehicular':'fa-truck','Otro':'fa-file'};
+function abrirFormDocumento(){
+  adjuntosTemp=[]; document.getElementById('adjuntosDocumento').innerHTML='';
+  ['docNombre','docVence','docNotas'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('docCategoria').value='Aviso de operación';
+  formularioActivo='documento';
+  bootstrap.Modal.getOrCreateInstance('#modalDocumento').show();
+}
+async function guardarDocumento(){
+  const nombre=document.getElementById('docNombre').value.trim();
+  if(!nombre){aviso('Escribe el nombre del documento','fa-triangle-exclamation');return;}
+  const doc={id:nuevoId(),nombre,
+    categoria:document.getElementById('docCategoria').value,
+    vence:document.getElementById('docVence').value||'',
+    notas:document.getElementById('docNotas').value.trim(),
+    subidoPor:usuarioActual?.nombre||'',
+    creado:new Date().toISOString()};
+  for(const a of adjuntosTemp) await dbGuardar('archivos',{...a,refId:doc.id});
+  doc.adjuntos=adjuntosTemp.length;
+  adjuntosTemp=[];
+  await dbGuardar('documentos',doc);
+  documentos.push(doc);
+  bootstrap.Modal.getInstance(document.getElementById('modalDocumento')).hide();
+  pintarDocumentos();
+  aviso('Documento <b>'+escapar(nombre)+'</b> guardado','fa-folder-open');
+}
+async function pintarDocumentos(){
+  const cont=document.getElementById('listaDocumentos'); if(!cont)return;
+  if(!documentos.length){
+    cont.innerHTML='<div class="vacio"><i class="fa-solid fa-folder-open"></i>Aún no has guardado documentos.</div>';
+    return;
+  }
+  const archivos=await metaArchivos();
+  const hoy=hoyISO();
+  const limite=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
+  const esAdmin=usuarioActual?.rol==='admin';
+  const lista=documentos.slice().sort((a,b)=>(a.vence||'9999').localeCompare(b.vence||'9999'));
+  cont.innerHTML=lista.map(d=>{
+    const adj=archivos.filter(a=>a.refId===d.id);
+    const vencido=d.vence&&d.vence<hoy;
+    const porVencer=d.vence&&d.vence>=hoy&&d.vence<=limite;
+    return `
+    <div class="fila-registro" style="box-shadow:none">
+      <div class="d-flex gap-2 align-items-start">
+        <div class="logo-icono" style="width:36px;height:36px;font-size:15px;flex:0 0 36px;border-radius:9px;background:${vencido?'var(--rojo)':porVencer?'var(--naranja)':'var(--azul-3)'}">
+          <i class="fa-solid ${ICONO_DOC[d.categoria]||'fa-file'}"></i></div>
+        <div style="min-width:0" class="flex-fill">
+          <div class="fw-bold text-truncate" style="font-size:13px">${escapar(d.nombre)}</div>
+          <div class="kpi-sub">${escapar(d.categoria)}${d.subidoPor?(' · '+escapar(d.subidoPor)):''}</div>
+          ${d.vence?`<span class="etiqueta ${vencido?'etiqueta-pendiente':porVencer?'etiqueta-pendiente':'etiqueta-pagado'}"
+            ${vencido?'style="background:rgba(220,38,38,.15);color:var(--rojo)"':''}>
+            ${vencido?'VENCIDO: ':porVencer?'Vence pronto: ':'Vence: '}${fechaBonita(d.vence)}</span>`:''}
+          ${d.notas?`<div class="kpi-sub mt-1">${escapar(d.notas)}</div>`:''}
+        </div>
+        <div class="d-flex flex-column gap-1">
+          ${adj.length?`<button class="btn btn-sm btn-suave border-0" onclick="verArchivo('${adj[0].id}')" title="Ver"><i class="fa-solid fa-eye"></i></button>
+          <button class="btn btn-sm btn-suave border-0" onclick="descargarAdjunto('${adj[0].id}')" title="Descargar"><i class="fa-solid fa-download"></i></button>`:''}
+          ${esAdmin?`<button class="btn btn-sm btn-outline-danger border-0" onclick="eliminarDocumento('${d.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>`:''}
+        </div>
+      </div>
+      ${adj.length>1?`<div class="kpi-sub mt-1"><i class="fa-solid fa-paperclip"></i> ${adj.length} archivo(s) adjunto(s): ${adj.map(a=>
+        `<a href="#" onclick="event.preventDefault();verArchivo('${a.id}')" style="color:var(--naranja)">${escapar(a.nombre)}</a>`).join(' · ')}</div>`:''}
+    </div>`;
+  }).join('');
+}
+async function eliminarDocumento(id){
+  const d=documentos.find(x=>x.id===id); if(!d)return;
+  if(!confirm('¿Eliminar el documento "'+d.nombre+'" y sus archivos adjuntos?'))return;
+  await dbBorrar('documentos',id);
+  const adj=await metaArchivos(id);
+  for(const a of adj) await dbBorrar('archivos',a.id);
+  documentos=documentos.filter(x=>x.id!==id);
+  pintarDocumentos();
+  aviso('Documento eliminado','fa-trash');
+}
+
+/* ============================================================
+   Parte 11: exportaciones (Excel, CSV, PDF)
+============================================================ */
+const CAB_ING=['Fecha','N° Factura','Cliente','Viaje','Camión','Conductor','Ruta','Monto','Estado','Fecha de pago','Observaciones'];
+const CAB_GAS=['Fecha','Tipo de gasto','Camión','Conductor','Proveedor','N° Factura','Monto','Observaciones'];
+const filaIng=i=>[i.fecha,i.factura,i.cliente,i.viaje,i.camion,i.conductor,i.ruta,Number(i.monto||0),i.estado,i.fechaPago||'',i.obs];
+const filaGas=g=>[g.fecha,g.tipo,g.camion,g.conductor,g.proveedor,g.factura,Number(g.monto||0),g.obs];
+
+function exportarExcel(){
+  if(!ingresos.length&&!gastos.length){aviso('No hay datos para exportar','fa-triangle-exclamation');return;}
+  const libro=XLSX.utils.book_new();
+  const hIng=XLSX.utils.aoa_to_sheet([CAB_ING,...ingresos.map(filaIng)]);
+  const hGas=XLSX.utils.aoa_to_sheet([CAB_GAS,...gastos.map(filaGas)]);
+  const tIng=ingresos.reduce((s,i)=>s+Number(i.monto||0),0);
+  const tGas=gastos.reduce((s,g)=>s+Number(g.monto||0),0);
+  const hRes=XLSX.utils.aoa_to_sheet([
+    ['Transport Luis & Katherine · Resumen financiero'],
+    ['Generado',new Date().toLocaleString('es-PA')],[],
+    ['Total de ingresos',tIng],['Total de gastos',tGas],['Utilidad',tIng-tGas]]);
+  XLSX.utils.book_append_sheet(libro,hRes,'Resumen');
+  XLSX.utils.book_append_sheet(libro,hIng,'Ingresos');
+  XLSX.utils.book_append_sheet(libro,hGas,'Gastos');
+  XLSX.writeFile(libro,'TransportLK_'+hoyISO()+'.xlsx');
+  aviso('Excel exportado correctamente','fa-file-excel');
+}
+function exportarCSV(cual){
+  const esIng=cual==='ingresos';
+  const datos=esIng?ingresos:gastos;
+  if(!datos.length){aviso('No hay '+cual+' para exportar','fa-triangle-exclamation');return;}
+  const filas=[esIng?CAB_ING:CAB_GAS,...datos.map(esIng?filaIng:filaGas)];
+  const csv='\uFEFF'+filas.map(f=>f.map(c=>{
+    const t=(c==null?'':String(c));
+    return /[";\n,]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t;
+  }).join(';')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  descargarDataURL(url,cual+'_TLK_'+hoyISO()+'.csv');
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+  aviso('CSV de '+cual+' exportado','fa-file-csv');
+}
+function exportarPDF(){
+  const anio=document.getElementById('anioReporte').value||'';
+  const ing=ingresos.filter(i=>!anio||(i.fecha||'').slice(0,4)===anio);
+  const gas=gastos.filter(g=>!anio||(g.fecha||'').slice(0,4)===anio);
+  const tIng=ing.reduce((s,i)=>s+Number(i.monto||0),0);
+  const tGas=gas.reduce((s,g)=>s+Number(g.monto||0),0);
+  const util=tIng-tGas;
+  const porTipo=agrupar(gas,'tipo');
+  const iCli=agrupar(ing.filter(i=>i.cliente),'cliente');
+  const gCam=agrupar(gas.filter(g=>g.camion),'camion');
+  const v=window.open('','_blank');
+  if(!v){aviso('Permite ventanas emergentes para generar el PDF','fa-triangle-exclamation');return;}
+  v.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
+    <title>Reporte ${anio} · Transport Luis & Katherine</title>
+    <style>body{font-family:Arial,sans-serif;color:#12233F;padding:26px;font-size:12px}
+    h1{font-size:18px;color:#0B2545;margin:0}h2{font-size:13px;color:#F77F00;border-bottom:2px solid #F77F00;
+    padding-bottom:4px;margin:20px 0 8px}table{width:100%;border-collapse:collapse;margin-top:4px}
+    th,td{border:1px solid #D8E0EC;padding:5px 7px;text-align:left}th{background:#0B2545;color:#fff;font-size:11px}
+    .der{text-align:right}.verde{color:#15803D;font-weight:bold}.rojo{color:#DC2626;font-weight:bold}
+    .sub{color:#5B6B84;font-size:11px}</style></head><body>
+    <h1>🚚 Transport Luis &amp; Katherine</h1>
+    <div class="sub">Reporte financiero ${anio?('· Año '+anio):''} · Generado el ${new Date().toLocaleString('es-PA')}</div>
+    <h2>Estado de resultados</h2>
+    <table><tr><th>Concepto</th><th class="der">Monto</th></tr>
+    <tr><td>Ingresos por servicios de transporte</td><td class="der verde">${dinero(tIng)}</td></tr>
+    ${porTipo.map(([t,m])=>`<tr><td style="padding-left:18px">· ${escapar(t)}</td><td class="der">${dinero(m)}</td></tr>`).join('')}
+    <tr><td><b>Total de gastos</b></td><td class="der rojo">${dinero(tGas)}</td></tr>
+    <tr><td><b>UTILIDAD</b></td><td class="der ${util>=0?'verde':'rojo'}">${dinero(util)}</td></tr></table>
+    <h2>Cuentas por cobrar (facturas pendientes)</h2>
+    <table><tr><th>Cliente</th><th>Factura</th><th>Fecha</th><th>Ruta</th><th class="der">Monto</th></tr>
+    ${ingresos.filter(i=>i.estado!=='Pagado').map(i=>`<tr><td>${escapar(i.cliente)}</td><td>${escapar(i.factura)}</td>
+      <td>${i.fecha||''}</td><td>${escapar(i.ruta)}</td><td class="der">${dinero(i.monto)}</td></tr>`).join('')||'<tr><td colspan="5">Sin facturas pendientes 🎉</td></tr>'}
+    <tr><td colspan="4"><b>Total por cobrar</b></td><td class="der rojo">${dinero(ingresos.filter(i=>i.estado!=='Pagado').reduce((s,i)=>s+Number(i.monto||0),0))}</td></tr></table>
+    <h2>Ingresos por cliente</h2>
+    <table><tr><th>Cliente</th><th class="der">Ingresos</th></tr>
+    ${iCli.map(([c,m])=>`<tr><td>${escapar(c)}</td><td class="der">${dinero(m)}</td></tr>`).join('')||'<tr><td colspan="2">Sin datos</td></tr>'}</table>
+    <h2>Gastos por camión</h2>
+    <table><tr><th>Camión</th><th class="der">Gastos</th></tr>
+    ${gCam.map(([c,m])=>`<tr><td>${escapar(c)}</td><td class="der">${dinero(m)}</td></tr>`).join('')||'<tr><td colspan="2">Sin datos</td></tr>'}</table>
+    <h2>Detalle de ingresos (${ing.length})</h2>
+    <table><tr><th>Fecha</th><th>Factura</th><th>Cliente</th><th>Camión</th><th>Ruta</th><th>Estado</th><th class="der">Monto</th></tr>
+    ${ing.map(i=>`<tr><td>${i.fecha||''}</td><td>${escapar(i.factura)}</td><td>${escapar(i.cliente)}</td>
+      <td>${escapar(i.camion)}</td><td>${escapar(i.ruta)}</td><td>${i.estado||''}</td><td class="der">${dinero(i.monto)}</td></tr>`).join('')}</table>
+    <h2>Detalle de gastos (${gas.length})</h2>
+    <table><tr><th>Fecha</th><th>Tipo</th><th>Proveedor</th><th>Camión</th><th class="der">Monto</th></tr>
+    ${gas.map(g=>`<tr><td>${g.fecha||''}</td><td>${escapar(g.tipo)}</td><td>${escapar(g.proveedor)}</td>
+      <td>${escapar(g.camion)}</td><td class="der">${dinero(g.monto)}</td></tr>`).join('')}</table>
+    <p class="sub" style="margin-top:20px">En el diálogo de impresión elige "Guardar como PDF".</p>
+    <script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`);
+  v.document.close();
+}
+
+/* ============================================================
+   Parte 12: respaldo y restauración
+============================================================ */
+async function respaldar(){
+  try{
+    const paquete=await api('respaldo');
+    const blob=new Blob([JSON.stringify(paquete)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    descargarDataURL(url,'Respaldo_TransportLK_'+hoyISO()+'.json');
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    aviso('Respaldo generado. Guárdalo en un lugar seguro.','fa-cloud-arrow-down');
+  }catch(err){aviso(escapar(err.message),'fa-triangle-exclamation');}
+}
+document.getElementById('archivoRespaldo').addEventListener('change',async e=>{
+  const archivo=e.target.files[0]; if(!archivo)return; e.target.value='';
+  if(!confirm('Restaurar reemplazará TODOS los datos del servidor por los del respaldo. ¿Continuar?'))return;
+  try{
+    const p=JSON.parse(await archivo.text());
+    const r=await api('restaurar','POST',p);
+    await cargarDatos();
+    pintarTodo(); pintarDocumentos();
+    aviso(`Respaldo restaurado: ${r.ingresos} ingreso(s) y ${r.gastos} gasto(s)`,'fa-cloud-arrow-up');
+  }catch(err){console.error(err);aviso(escapar(err.message||'El archivo no es un respaldo válido'),'fa-triangle-exclamation');}
+});
+async function borrarTodo(){
+  if(!confirm('¿Borrar TODOS los ingresos, gastos, documentos y facturas adjuntas del servidor? Esta acción afecta a todos los usuarios y no se puede deshacer.'))return;
+  if(!confirm('Última confirmación: se eliminará toda la información para todos.'))return;
+  try{
+    await api('todo','DELETE');
+    ingresos=[]; gastos=[]; documentos=[];
+    pintarTodo(); pintarDocumentos(); aviso('Todos los datos fueron eliminados','fa-trash');
+  }catch(err){aviso(escapar(err.message),'fa-triangle-exclamation');}
+}
+
+/* ============================================================
+   Inicio de la aplicación
+============================================================ */
+(async function iniciar(){
+  await estadoPinInicial();
+  if(token){
+    try{
+      const u=await api('yo');
+      await iniciarSesion({token,usuario:u});
+      return;
+    }catch(e){/* la sesión guardada ya no es válida */}
+  }
+  document.getElementById('pantallaPin').style.display='flex';
+})();
+</script>
+</body>
+</html>
